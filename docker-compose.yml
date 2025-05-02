@@ -1,0 +1,6 @@
+services:
+  app:
+    image: ghcr.io/remla25-team6/app:0.0.2
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
