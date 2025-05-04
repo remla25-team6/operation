@@ -3,3 +3,7 @@
 -- Sten: --
 Created PR: https://github.com/remla25-team6/lib-version/pull/1
 Approved PR: https://github.com/remla25-team6/model-training/pull/1
+
+-- Alex: --
+Created PR: https://github.com/remla25-team6/model-service/pull/1
+Approved PR: https://github.com/remla25-team6/lib-version/pull/1
