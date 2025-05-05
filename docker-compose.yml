@@ -1,6 +1,16 @@
 services:
+  model_service:
+    image: ghcr.io/remla25-team6/model-service:latest
+    ports:
+      - "8081:8080"
+    container_name: model_service
+
   app:
-    image: ghcr.io/remla25-team6/app:0.0.2
+    image: ghcr.io/remla25-team6/app:latest
     ports:
       - "8080:8080"
-    restart: unless-stopped
+    environment:
+      - MODEL_URL=http://model_service:8080
+    depends_on:
+      - model_service
+    container_name: app
