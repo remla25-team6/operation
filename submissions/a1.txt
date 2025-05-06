@@ -1,0 +1,16 @@
+operation: https://github.com/remla25-team6/operation
+model_training: https://github.com/remla25-team6/model-training
+model_service: https://github.com/remla25-team6/model-service
+lib_ml: https://github.com/remla25-team6/lib-ml
+lib_version: https://github.com/remla25-team6/lib-version
+app: https://github.com/remla25-team6/app
+
+
+## Comments for A1:
+We did not implement the X subtask. For Y, you can find more information at ...
+- operation: TODO
+- model_training: TODO
+- model_service: TODO
+- lib_ml: TODO
+- lib_version: TODO
+- app: TODO
