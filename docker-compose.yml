@@ -1,0 +1,32 @@
+  services:
+    model_service:
+      image: ${MODEL_IMAGE}
+      platform: linux/amd64
+      ports:
+        - ":8080"
+      container_name: model-service
+      restart: unless-stopped
+      volumes:
+        - ./model:/app/folder
+      secrets:
+        - example_secret
+
+    app:
+      image: ${APP_IMAGE}
+      platform: linux/amd64
+      ports:
+        - "8080:8080"
+      environment:
+        - MODEL_URL=http://model-service:8080
+      depends_on:
+        - model_service
+      container_name: app
+      restart: unless-stopped
+      volumes:
+        - ./model:/app/folder
+      secrets:
+        - example_secret
+
+  secrets:
+    example_secret:
+      file: ./secrets/example_secret.txt
