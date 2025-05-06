@@ -20,7 +20,9 @@
 - Created PR: https://github.com/remla25-team6/model-service/pull/6
 
 ### Maarten
-TBD
+- Created PR: https://github.com/remla25-team6/app/pull/2
+- Approved PR: https://github.com/remla25-team6/model-service/pull/1
 
 ### Martijn
-TBD
+- Created PR: https://github.com/remla25-team6/lib-ml/pull/1
+- Approved PR:
