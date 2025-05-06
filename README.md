@@ -26,6 +26,10 @@ Below we list the repositories in our system, along with pointers to relevant fi
 ### [lib-ml](https://github.com/remla25-team6/lib-ml)
 
 ### [app](https://github.com/remla25-team6/app)
+- [prerelease.yml](https://github.com/remla25-team6/app/blob/main/.github/workflows/prerelease.yml): Workflow that triggers on any push to main that creates a pre-release.
+- [release.yml](https://github.com/remla25-team6/app/blob/main/.github/workflows/release.yml): Workflow that triggers on semantic tagging that creates a stable release.
+- [ModelController](https://github.com/remla25-team6/app/blob/main/src/main/java/com/remla6/app/controller/ModelController.java): Class responsible for defining REST-endpoints
+- [ModelService](https://github.com/remla25-team6/app/blob/main/src/main/java/com/remla6/app/service/ModelService.java): Class responsible for handling user request for sentiment analysis
 
 ### [operation](https://github.com/remla25-team6/operation)
 
