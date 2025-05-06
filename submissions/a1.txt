@@ -12,5 +12,9 @@ We did not implement the X subtask. For Y, you can find more information at ...
 - model_training: TODO
 - model_service: TODO
 - lib_ml: TODO
-- lib_version: TODO
+- lib_version:
+We implemented all the requirements as follows:
+• Create a VersionUtil class that can be asked for its version.
+• A workflow is used to automatically release the library in a package registry that matches the language.
+• The library is versioned automatically, e.g., by picking-up on the corresponding Git version tag.
 - app: TODO
