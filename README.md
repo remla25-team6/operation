@@ -35,6 +35,7 @@ Below we list the repositories in our system, along with pointers to relevant fi
 - [ModelService](https://github.com/remla25-team6/app/blob/main/src/main/java/com/remla6/app/service/ModelService.java): Class responsible for handling user request for sentiment analysis
 
 ### [operation](https://github.com/remla25-team6/operation)
+- In `submissions/a1.md` you can find a summary of the features we implemented per repo for assignment 1.
 
 ### [lib-version](https://github.com/remla25-team6/lib-version)
 - [VersionUtil.java](https://github.com/remla25-team6/lib-version/blob/main/src/main/java/org/remla25team6/libversion/VersionUtil.java): The class that can be asked for the library's versions.
