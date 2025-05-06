@@ -4,6 +4,7 @@
 From the root directory:
 - `echo your_personal_access_token | docker login ghcr.io -u your_github_username --password-stdin` to login
 - `docker compose up` to start the application.
+- Access at: http://127.0.0.1:8080/
 - `docker compose down` to stop the application.
 
 ## Repositories
