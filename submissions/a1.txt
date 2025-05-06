@@ -1,9 +1,9 @@
-operation: https://github.com/remla25-team6/operation
-model_training: https://github.com/remla25-team6/model-training
-model_service: https://github.com/remla25-team6/model-service
-lib_ml: https://github.com/remla25-team6/lib-ml
-lib_version: https://github.com/remla25-team6/lib-version
-app: https://github.com/remla25-team6/app
+operation: https://github.com/remla25-team6/operation/tree/a1
+model_training: https://github.com/remla25-team6/model-training/tree/a1
+model_service: https://github.com/remla25-team6/model-service/tree/a1
+lib_ml: https://github.com/remla25-team6/lib-ml/tree/a1
+lib_version: https://github.com/remla25-team6/lib-version/tree/a1
+app: https://github.com/remla25-team6/app/tree/a1
 
 
 ## Comments for A1:
