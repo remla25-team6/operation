@@ -1,0 +1,6 @@
+# node.yml
+---
+# Ansible playbook for worker nodes
+- name: Configure worker nodes
+  hosts: node-* 
+  tasks: []

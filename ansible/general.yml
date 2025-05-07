@@ -1,0 +1,27 @@
+# general.yml
+---
+# General Ansible playbook for both ctrl and worker nodes
+- name: 
+  become: true
+  hosts: all
+
+  tasks:
+    - name: Disable Swap
+      shell:
+        cmd: swapoff -a
+        register: swapoff
+        changed_when: swapoff.rc == 0
+    
+    - name: Disable Swap in fstab
+      lineinfile:
+        path: /etc/fstab
+        regexp: '^([^#].*\sswap\s+sw\s+.*)$'
+        state: absent
+        backup: yes
+
+    # TODO: Take SSH key from a .pub file from directory in the repository
+    - name: Set authorized key for user ubuntu copying it from current user
+      ansible.posix.authorized_key:
+        user: ubuntu
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"

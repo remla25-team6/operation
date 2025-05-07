@@ -1,0 +1,6 @@
+# ctrl.yml
+---
+# Ansible playbook for control node
+- name: Configure ctrl node
+  hosts: ctrl
+  import_playbook: ansible/general.yml
