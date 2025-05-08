@@ -25,3 +25,19 @@
         user: ubuntu
         state: present
         key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
+    # Step 6
+    - name: Create k8s.conf file
+      ansible.builtin.copy:
+        dest: /etc/modules-load.d/k8s.conf
+        content: |
+          overlay
+          br_netfilter
+        owner: root
+        group: root
+        mode: '0644'
+    
+    - name: Load br_netfilter module
+      community.general.modprobe:
+        module: br_netfilter
+        state: present
