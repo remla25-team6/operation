@@ -54,5 +54,13 @@
         - net.bridge.bridge-nf-call-iptables
         - net.bridge.bridge-nf-call-ip6tables
 
+    # Step 8
+    - name: Manage /etc/hosts
+      ansible.builtin.blockinfile:
+        path: /etc/hosts
+        block: "{{ lookup('template', 'templates/hosts.j2') }}"
+        owner: root
+        group: root
+        mode: '0644'
     
     
