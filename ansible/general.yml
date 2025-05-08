@@ -1,0 +1,24 @@
+# general.yml
+---
+# General tasks for both ctrl and worker nodes
+- name: Disable Swap
+  shell:
+    cmd: swapoff -a
+  register: swapoff
+  changed_when: swapoff.rc == 0
+
+- name: Disable Swap in fstab
+  lineinfile:
+    path: /etc/fstab
+    regexp: '^([^#].*\sswap\s+sw\s+.*)$'
+    state: absent
+    backup: yes
+
+- name: Set authorized key from file
+  ansible.posix.authorized_key:
+    user: vagrant
+    state: present
+    key: '{{ item }}'
+  with_file:
+    - ../keys/id_rsa_martijn.pub
+    - ../keys/id_rsa_sten.pub

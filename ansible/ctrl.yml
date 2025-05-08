@@ -1,0 +1,7 @@
+# ctrl.yml
+---
+# Ansible playbook for control node
+- hosts: ctrl
+  become: true
+  tasks:
+    - import_tasks: general.yml
