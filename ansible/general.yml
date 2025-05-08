@@ -78,6 +78,15 @@
       ansible.builtin.apt:
         update_cache: yes
 
-
-    
-    
+    # Step 10
+    - name: Install K8s tools
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - "containerd.io=1.7.24"
+        - "runc=1.1.12"
+        - "kubeadm=1.32.4"
+        - "kubelet=1.32.4"
+        - "kubectl=1.32.4"  
