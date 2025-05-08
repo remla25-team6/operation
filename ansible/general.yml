@@ -21,5 +21,4 @@
     key: '{{ item }}'
   with_file:
     - ../keys/id_rsa_martijn.pub
-    # - ../keys/id_rsa_name2.pub
-    # - ../keys/id_rsa_name3.pub
+    - ../keys/id_rsa_sten.pub
