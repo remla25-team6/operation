@@ -63,4 +63,21 @@
         group: root
         mode: '0644'
     
+    # Step 9
+    - name: Add kubernetes signing key
+      ansible.builtin.apt_key:
+        url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
+        state: present
+    
+    - name: Add kubernetes repository as package source
+      ansible.builtin.apt_repository:
+        repo: deb https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /
+        state: present
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+
+    
     
