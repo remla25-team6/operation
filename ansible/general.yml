@@ -22,3 +22,69 @@
   with_file:
     - ../keys/id_rsa_martijn.pub
     - ../keys/id_rsa_sten.pub
+
+# Step 6
+- name: Create k8s.conf file
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/k8s.conf
+    content: |
+      overlay
+      br_netfilter
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Load br_netfilter module
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+
+# Step 7
+- name: Enable IPv4 forwarding
+  ansible.builtin.sysctl:
+    name: "{{ item }}"
+    value: 1
+    state: present
+    reload: yes
+  loop:
+    - net.ipv4.ip_forward
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-ip6tables
+
+# Step 8
+- name: Manage /etc/hosts
+  ansible.builtin.blockinfile:
+    path: /etc/hosts
+    block: "{{ lookup('template', 'templates/hosts.j2') }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+# Step 9
+- name: Add kubernetes signing key
+  ansible.builtin.apt_key:
+    url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
+    state: present
+
+- name: Add kubernetes repository as package source
+  ansible.builtin.apt_repository:
+    repo: deb https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /
+    state: present
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+# Step 10
+- name: Install K8s tools
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - "containerd"
+    - "runc"
+    - "kubeadm"
+    - "kubelet"
+    - "kubectl"
+   
