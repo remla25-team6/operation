@@ -3,5 +3,85 @@
 # Ansible playbook for control node
 - hosts: ctrl
   become: true
+  vars:
+    apiserver_addr: 192.168.56.100
+    pod_cidr: 10.244.0.0/16
+    ctrl_name: ctrl
+    kubeconfig_host_path: "../" # Hosts root project directry
+    kubeconfig_user_path: "/home/vagrant/.kube/config"
+    kubeconfig_src: "/etc/kubernetes/admin.conf"
+    flannel_version: "v0.26.7"
+    flannel_url: "https://raw.githubusercontent.com/flannel-io/flannel/{{ flannel_version }}/Documentation/kube-flannel.yml"
+    flannel_tmp: "/tmp/kube-flannel-{{ flannel_version }}.yml"
+    flannel_iface: "eth1"
+
   tasks:
     - import_tasks: general.yml
+
+    # Step 13
+    - name: Check for /etc/kubernetes/admin.conf
+      stat: 
+        path: /etc/kubernetes/admin.conf
+      register: admin_conf
+
+    - name: Initialize kubernetes iff admin.conf is absent
+      shell: |
+        kubeadm init \
+          --apiserver-advertise-address={{ apiserver_addr }} \
+          --node-name={{ ctrl_name }} \
+          --pod-network-cidr={{ pod_cidr }}
+      args:
+        creates: /etc/kubernetes/admin.conf
+      when: not admin_conf.stat.exists
+    
+    # Step 14
+    - name: Create .kube directory
+      file:
+        path: "{{ kubeconfig_user_path | dirname }}"
+        state: directory
+        owner: vagrant
+        group: vagrant
+        mode: '0755'
+    
+    - name: Copy admin.conf to vagrant user's .kube
+      copy:
+        src: "{{ kubeconfig_src }}"
+        dest: "{{ kubeconfig_user_path }}"
+        remote_src: true
+        owner: vagrant
+        group: vagrant
+        mode: '0644'
+
+    - name: Copy (fetch) admin.conf to host folder
+      fetch:
+        src: "{{ kubeconfig_src }}"
+        dest: "{{ kubeconfig_host_path }}"
+        flat: true
+        owner: root
+        group: root
+        mode: '0644'
+    
+    # Step 15
+    - name: Check if Flannel manifest is present
+      stat:
+        path: "{{ flannel_url }}"
+      register: flannel_pres
+
+    - name: Download Flannel manifest
+      get_url:
+        url: "{{ flannel_url }}"
+        dest: "{{ flannel_tmp }}"
+        mode: '0644'
+      when: not flannel_pres.stat.exists
+
+    - name: Inject --iface into Flannel DaemonSet args
+      ansible.builtin.replace:
+        path: "{{ flannel_tmp }}"
+        regexp: '^(\s*)- --ip-masq$'
+        replace: '\1- --ip-masq\n\1- --iface={{ flannel_iface }}'
+
+
+    - name: Apply Flannel network manifest
+      shell: >
+        kubectl apply -f {{ flannel_tmp }}
+        --kubeconfig {{ kubeconfig_src }}
