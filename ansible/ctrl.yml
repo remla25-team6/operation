@@ -52,15 +52,13 @@
         group: vagrant
         mode: '0644'
 
-    - name: Copy (fetch) admin.conf to host folder
-      fetch:
+    - name: Publish admin.conf to host via /vagrant
+      copy:
         src: "{{ kubeconfig_src }}"
-        dest: "{{ kubeconfig_host_path }}"
-        flat: true
-        owner: root
-        group: root
+        dest: /vagrant/admin.conf
+        remote_src: true
         mode: '0644'
-    
+        
     # Step 15
     - name: Check if Flannel manifest is present
       stat:
