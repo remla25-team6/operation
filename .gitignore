@@ -34,3 +34,5 @@ build/
 
 ### Vagrant ###
 .vagrant/
+
+admin.conf

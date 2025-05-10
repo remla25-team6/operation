@@ -9,11 +9,16 @@ Vagrant.configure("2") do |config|
     # Control node configuration
     config.vm.define "ctrl" do |ctrl|
         ctrl.vm.provider "virtualbox" do |vb|
-            vb.memory = 4096
-            vb.cpus = 1
+            vb.memory = 4048
+            vb.cpus = 2
         end
         ctrl.vm.network "private_network", ip: "192.168.56.100"
         ctrl.vm.hostname = "ctrl"
+
+        #ctrl.vm.network "forwarded_port",
+        #    guest: 6443,
+        #    host: 6443,
+        #    host_ip: "192.168.56.100"
 
         ctrl.vm.provision "ansible" do |ansible|
             ansible.playbook = "ansible/ctrl.yml"

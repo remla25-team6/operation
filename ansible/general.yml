@@ -1,11 +1,9 @@
 # general.yml
 ---
 # General tasks for both ctrl and worker nodes
-- name: Disable Swap
-  shell:
-    cmd: swapoff -a
-  register: swapoff
-  changed_when: swapoff.rc == 0
+- name: Disable swap iff it's active
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
 
 - name: Disable Swap in fstab
   lineinfile:
@@ -87,4 +85,47 @@
     - "kubeadm"
     - "kubelet"
     - "kubectl"
-   
+
+# Step 11
+- name: Create /etc/containerd directory
+  file: 
+    path: /etc/containerd
+    state: directory
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Generate default conterd config if missing
+  shell: containerd config default > /etc/containerd/config.toml
+  args:
+    creates: /etc/containerd/config.toml
+  
+- name: Disable AppArmor in containerD
+  lineinfile:
+    path: /etc/containerd/config.toml
+    regexp: '^\s*disable_apparmor\s*='
+    line: '    disable_apparmor = true'
+
+- name: Set sandbox_image to registry.k8s.io/pause:3.10
+  lineinfile:
+    path: /etc/containerd/config.toml
+    regexp: '^\s*sandbox_image\s*='
+    line: '    sandbox_image = "registry.k8s.io/pause:3.10"'
+
+- name: Enable SystemdCgroup for runc
+  lineinfile:
+    path: /etc/containerd/config.toml
+    regexp: '^\s*SystemdCgroup\s*='
+    line: '            SystemdCgroup = true'
+
+- name: Restart and enable containerd
+  service:
+    name: containerd
+    state: restarted
+    enabled: yes
+
+- name: Register kubelet for auto-start
+  service:
+    name: kubelet
+    state: started
+    enabled: yes
