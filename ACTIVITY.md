@@ -26,3 +26,25 @@
 ### Martijn
 - Created PR: https://github.com/remla25-team6/lib-ml/pull/1
 - Approved PR: https://github.com/remla25-team6/operation/pull/4
+
+# A2
+
+### Sten:
+- Created PR: https://github.com/remla25-team6/operation/pull/6
+- Approved PR: https://github.com/remla25-team6/operation/pull/5
+
+### Alex:
+- Created PR:
+- Approved PR:
+
+### Inaesh: 
+- Created PR:
+- Approved PR: https://github.com/remla25-team6/operation/pull/8
+
+### Maarten
+- Created PR: https://github.com/remla25-team6/operation/pull/8
+- Approved PR: https://github.com/remla25-team6/operation/pull/6
+
+### Martijn
+- Created PR: https://github.com/remla25-team6/operation/pull/5
+- Approved PR:
