@@ -5,3 +5,10 @@
   become: true
   tasks:
     - import_tasks: general.yml
+
+    # A2: Step 18
+    - name: Generate join command on controller
+      shell: kubeadm token create --print-join-command
+      register: join_command
+      delegate_to: ctrl
+      run_once: true
