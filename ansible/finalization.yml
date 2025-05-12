@@ -12,7 +12,7 @@
     kubeconfig_src: "/etc/kubernetes/admin.conf"
 
   tasks:
-    # A2: Step 20: Download MetalLB CRDs manifest
+    # A2: Step 20
     - name: Download MetalLB CRDs
       get_url:
         url: "{{ metallb_url }}"
@@ -70,3 +70,105 @@
       retries: 5
       delay: 10
 
+    # A2: Step 21
+    - name: Add ingress-nginx Helm repository
+      community.kubernetes.helm_repository:
+        name: ingress-nginx
+        repo_url: https://kubernetes.github.io/ingress-nginx
+
+    - name: Deploy Nginx Ingress Controller
+      community.kubernetes.helm:
+        name: ingress-nginx
+        chart_ref: ingress-nginx/ingress-nginx
+        release_namespace: ingress-nginx
+        create_namespace: true
+
+    # A2: Step 22
+    - name: Add Kubernetes Dashboard Helm repository
+      community.kubernetes.helm_repository:
+        name: kubernetes-dashboard
+        repo_url: https://kubernetes.github.io/dashboard/
+
+    - name: Deploy Kubernetes Dashboard via Helm
+      community.kubernetes.helm:
+        name: kubernetes-dashboard
+        chart_ref: kubernetes-dashboard/kubernetes-dashboard
+        release_namespace: kubernetes-dashboard
+        create_namespace: true
+
+    - name: Create admin-user ServiceAccount for dashboard
+      shell: |
+        cat <<EOF | kubectl apply -f - --kubeconfig="{{ kubeconfig_src }}"
+        apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          name: admin-user
+          namespace: kubernetes-dashboard
+        EOF
+      args:
+        executable: /bin/bash
+
+    - name: Create ClusterRoleBinding for admin-user
+      shell: |
+        cat <<EOF | kubectl apply -f - --kubeconfig="{{ kubeconfig_src }}"
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: admin-user-binding
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: cluster-admin
+        subjects:
+        - kind: ServiceAccount
+          name: admin-user
+          namespace: kubernetes-dashboard
+        EOF
+      args:
+        executable: /bin/bash
+
+    - name: Create Ingress for Kubernetes Dashboard
+      shell: |
+        cat <<EOF | kubectl apply -f - --kubeconfig="{{ kubeconfig_src }}"
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: kubernetes-dashboard-ingress
+          namespace: kubernetes-dashboard
+          annotations:
+            nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+        spec:
+          rules:
+          - host: dashboard.local
+            http:
+              paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: kubernetes-dashboard
+                    port:
+                      number: 443
+        EOF
+      args:
+        executable: /bin/bash
+
+    # A2: Step 23
+    - name: Install Istio CLI binary
+      unarchive:
+        src: ./istio-1.25.2-linux-amd64.tar.gz
+        dest: /home/vagrant
+        remote_src: false
+      register: istio_unpacked
+
+    - name: Add istioctl to PATH
+      lineinfile:
+        dest: /home/vagrant/.bashrc
+        line: 'export PATH=$PATH:/home/vagrant/istio-1.25.2/bin'
+      when: istio_unpacked.changed
+
+    - name: Run istioctl install
+      command: istioctl install --set profile=demo -y
+      args:
+        chdir: /home/vagrant/istio-1.25.2
+      when: install_istio | default(false)
