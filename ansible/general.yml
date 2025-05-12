@@ -18,10 +18,11 @@
     state: present
     key: '{{ item }}'
   with_file:
+    - ../keys/id_rsa_inaesh.pub
     - ../keys/id_rsa_martijn.pub
     - ../keys/id_rsa_sten.pub
 
-# Step 6
+# A2: Step 6
 - name: Create k8s.conf file
   ansible.builtin.copy:
     dest: /etc/modules-load.d/k8s.conf
@@ -37,7 +38,7 @@
     name: br_netfilter
     state: present
 
-# Step 7
+# A2: Step 7
 - name: Enable IPv4 forwarding
   ansible.builtin.sysctl:
     name: "{{ item }}"
@@ -49,7 +50,7 @@
     - net.bridge.bridge-nf-call-iptables
     - net.bridge.bridge-nf-call-ip6tables
 
-# Step 8
+# A2: Step 8
 - name: Manage /etc/hosts
   ansible.builtin.blockinfile:
     path: /etc/hosts
@@ -58,7 +59,7 @@
     group: root
     mode: '0644'
 
-# Step 9
+# A2: Step 9
 - name: Add kubernetes signing key
   ansible.builtin.apt_key:
     url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
@@ -73,7 +74,7 @@
   ansible.builtin.apt:
     update_cache: yes
 
-# Step 10
+# A2: Step 10
 - name: Install K8s tools
   ansible.builtin.apt:
     name: "{{ item }}"
@@ -86,7 +87,7 @@
     - "kubelet"
     - "kubectl"
 
-# Step 11
+# A2: Step 11
 - name: Create /etc/containerd directory
   file: 
     path: /etc/containerd
@@ -124,6 +125,7 @@
     state: restarted
     enabled: yes
 
+# A2: Step 12
 - name: Register kubelet for auto-start
   service:
     name: kubelet

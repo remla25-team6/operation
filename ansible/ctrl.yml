@@ -18,7 +18,7 @@
   tasks:
     - import_tasks: general.yml
 
-    # Step 13
+    # A2: Step 13
     - name: Check for /etc/kubernetes/admin.conf
       stat: 
         path: /etc/kubernetes/admin.conf
@@ -34,7 +34,7 @@
         creates: /etc/kubernetes/admin.conf
       when: not admin_conf.stat.exists
     
-    # Step 14
+    # A2: Step 14
     - name: Create .kube directory
       file:
         path: "{{ kubeconfig_user_path | dirname }}"
@@ -59,7 +59,7 @@
         remote_src: true
         mode: '0644'
         
-    # Step 15
+    # A2: Step 15
     - name: Check if Flannel manifest is present
       stat:
         path: "{{ flannel_url }}"
@@ -83,3 +83,35 @@
       shell: >
         kubectl apply -f {{ flannel_tmp }}
         --kubeconfig {{ kubeconfig_src }}
+
+    # A2: Step 16
+    - name: Add Helm signing key
+      ansible.builtin.apt_key:
+        url: https://baltocdn.com/helm/signing.asc
+        state: present
+
+    - name: Add Helm apt repository
+      ansible.builtin.apt_repository:
+        repo: deb https://baltocdn.com/helm/stable/debian/ all main
+        state: present
+        filename: helm-stable
+    
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install Helm package
+      ansible.builtin.apt:
+        name: helm
+        state: present
+
+    # A2: Step 17
+    # Used ChatGPT-4o to figure out how to skip re-installing the helm-diff plugin during re-provisioning
+    - name: Get list of installed helm plugins
+      command: helm plugin list
+      register: helm_plugins
+      changed_when: false
+
+    - name: Install helm-diff if not installed
+      shell: helm plugin install https://github.com/databus23/helm-diff
+      when: "'diff' not in helm_plugins.stdout"  
