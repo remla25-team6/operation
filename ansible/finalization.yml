@@ -24,15 +24,11 @@
       register: crd_apply
       changed_when: "'created' in crd_apply.stdout or 'configured' in crd_apply.stdout"
 
-    - name: Wait for MetalLB controller ready
+    - name: Wait for MetalLB controller to be ready
       shell: |
         kubectl wait -n metallb-system \
           -l app=metallb,component=controller \
           --for=condition=ready pod --timeout=60s --kubeconfig="{{ kubeconfig_src }}"
-      args:
-        executable: /bin/bash
-      register: wait_metallb
-      until: wait_metallb.rc == 0
 
     - name: Create MetalLB IPAddressPool
       shell: |
