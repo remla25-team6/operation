@@ -1,0 +1,73 @@
+---
+# finalization.yml
+---
+# Ansible playbook for finalizing steps
+- name: Finalize Kubernetes cluster setup from finalization workbook
+  hosts: 192.168.56.100
+  become: true
+
+  vars:
+    metallb_url: "https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml"  # according to assignment
+    metallb_crd: "/tmp/metallb-native.yaml"
+    ip_pool_range: "192.168.56.90-192.168.56.99"  # According to assignment
+    kubeconfig_src: "/etc/kubernetes/admin.conf"
+
+  tasks:
+    # A2: Step 20: Download MetalLB CRDs manifest
+    - name: Download MetalLB CRDs
+      get_url:
+        url: "{{ metallb_url }}"
+        dest: "{{ metallb_crd }}"
+        mode: '0644'
+
+    - name: Apply MetalLB CRDs
+      shell: kubectl apply -f "{{ metallb_crd }}" --kubeconfig="{{ kubeconfig_src }}"
+      register: crd_apply
+      changed_when: "'created' in crd_apply.stdout or 'configured' in crd_apply.stdout"
+
+    - name: Create MetalLB IPAddressPool
+      shell: |
+        cat <<EOF | kubectl apply -f - --kubeconfig="{{ kubeconfig_src }}"
+        apiVersion: metallb.io/v1beta1
+        kind: IPAddressPool
+        metadata:
+          namespace: metallb-system
+          name: default
+        spec:
+          addresses:
+            - "{{ ip_pool_range }}"
+        EOF
+      args:
+        executable: /bin/bash
+      register: ippool_apply
+      changed_when: "'created' in ippool_apply.stdout or 'configured' in ippool_apply.stdout"
+
+    - name: Create MetalLB L2Advertisement
+      shell: |
+        cat <<EOF | kubectl apply -f - --kubeconfig="{{ kubeconfig_src }}"
+        apiVersion: metallb.io/v1beta1
+        kind: L2Advertisement
+        metadata:
+          namespace: metallb-system
+          name: l2-adv
+        spec:
+          ipAddressPools:
+            - default
+        EOF
+      args:
+        executable: /bin/bash
+      register: l2adv_apply
+      changed_when: "'created' in l2adv_apply.stdout or 'configured' in l2adv_apply.stdout"
+
+    - name: Wait for MetalLB controller
+      shell: |
+        kubectl wait -n metallb-system \
+          -l app=metallb,component=controller \
+          --for=condition=ready pod --timeout=60s --kubeconfig="{{ kubeconfig_src }}"
+      args:
+        executable: /bin/bash
+      register: wait_metallb
+      until: wait_metallb.rc == 0
+      retries: 5
+      delay: 10
+

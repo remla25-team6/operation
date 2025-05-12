@@ -18,9 +18,10 @@
     state: present
     key: '{{ item }}'
   with_file:
-    - ../keys/id_rsa_inaesh.pub
+    - ../keys/id_ed25519_inaesh.pub
     - ../keys/id_rsa_martijn.pub
     - ../keys/id_rsa_sten.pub
+    - ../keys/id_ed25519_alex.pub
 
 # A2: Step 6
 - name: Create k8s.conf file

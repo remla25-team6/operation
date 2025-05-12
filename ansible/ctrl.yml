@@ -1,7 +1,8 @@
 # ctrl.yml
 ---
 # Ansible playbook for control node
-- hosts: ctrl
+- name: Setting up control node from ctrl notebook
+  hosts: ctrl
   become: true
   vars:
     apiserver_addr: 192.168.56.100
