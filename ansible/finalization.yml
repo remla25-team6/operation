@@ -1,4 +1,3 @@
----
 # finalization.yml
 ---
 # Ansible playbook for finalizing steps
@@ -21,7 +20,7 @@
         mode: '0644'
 
     - name: Apply MetalLB CRDs
-      shell: kubectl apply -f "{{ metallb_crd }}" --kubeconfig="{{ kubeconfig_src }}"
+      shell: kubectl apply -f "{{ metallb_crd }}" --kubeconfig="{{ kubeconfig_src }}" 
       register: crd_apply
       changed_when: "'created' in crd_apply.stdout or 'configured' in crd_apply.stdout"
 
