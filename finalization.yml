@@ -2,7 +2,7 @@
 ---
 # Ansible playbook for finalizing steps
 - name: Finalize Kubernetes cluster setup from finalization workbook
-  hosts: 192.168.56.100
+  hosts: all
   become: true
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
@@ -14,69 +14,63 @@
     
   tasks:
     # A2: Step 20
-    - name: Download MetalLB CRDs
-      get_url:
-        url: "{{ metallb_url }}"
-        dest: "{{ metallb_crd }}"
-        mode: '0644'
+    # - name: Download MetalLB CRDs
+    #   get_url:
+    #     url: "{{ metallb_url }}"
+    #     dest: "{{ metallb_crd }}"
+    #     mode: '0644'
 
-    - name: Apply MetalLB CRDs
-      shell: kubectl apply -f
-      register: crd_apply
-      changed_when: "'created' in crd_apply.stdout or 'configured' in crd_apply.stdout"
+    # - name: Apply MetalLB CRDs
+    #   shell: "kubectl apply -f {{ metallb_crd }}"
+    #   register: crd_apply
+    #   changed_when: "'created' in crd_apply.stdout or 'configured' in crd_apply.stdout"
 
-    - name: Wait for MetalLB controller to be ready
-      shell: |
-        kubectl wait -n metallb-system \
-          -l app=metallb,component=controller \
-          --for=condition=ready pod --timeout=60s
+    # - name: Create MetalLB IPAddressPool
+    #   shell: |
+    #     cat <<EOF | kubectl apply -f -
+    #     apiVersion: metallb.io/v1beta1
+    #     kind: IPAddressPool
+    #     metadata:
+    #       name: default-pool
+    #       namespace: metallb-system
+    #     spec:
+    #       addresses:
+    #       - "{{ ip_pool_range }}"
+    #     EOF
+    #   register: ippool_apply
+    #   changed_when: "'created' in ippool_apply.stdout or 'configured' in ippool_apply.stdout"
 
-    - name: Create MetalLB IPAddressPool
-      shell: |
-        cat <<EOF | kubectl apply -f
-        apiVersion: metallb.io/v1beta1
-        kind: IPAddressPool
-        metadata:
-          namespace: metallb-system
-          name: default
-        spec:
-          addresses:
-            - "{{ ip_pool_range }}"
-        EOF
-      args:
-        executable: /bin/bash
-      register: ippool_apply
-      changed_when: "'created' in ippool_apply.stdout or 'configured' in ippool_apply.stdout"
+    # - name: Create MetalLB L2Advertisement
+    #   shell: |
+    #     cat <<EOF | kubectl apply -f -
+    #     apiVersion: metallb.io/v1beta1
+    #     kind: L2Advertisement
+    #     metadata:
+    #       name: l2-adv
+    #       namespace: metallb-system
+    #     spec:
+    #       ipAddressPools:
+    #       - default-pool
+    #     EOF
+    #   args:
+    #     executable: /bin/bash
+    #   register: l2adv_apply
+    #   changed_when: "'created' in l2adv_apply.stdout or 'configured' in l2adv_apply.stdout"
 
-    - name: Create MetalLB L2Advertisement
-      shell: |
-        cat <<EOF | kubectl apply -f
-        apiVersion: metallb.io/v1beta1
-        kind: L2Advertisement
-        metadata:
-          namespace: metallb-system
-          name: l2-adv
-        spec:
-          ipAddressPools:
-            - default
-        EOF
-      args:
-        executable: /bin/bash
-      register: l2adv_apply
-      changed_when: "'created' in l2adv_apply.stdout or 'configured' in l2adv_apply.stdout"
+    # - name: Wait for MetalLB controller to be ready
+    #   shell: |
+    #     kubectl wait -n metallb-system \
+    #       -l app=metallb,component=controller \
+    #       --for=condition=ready pod --timeout=60s
 
     # A2: Step 21
     - name: Add ingress-nginx Helm repository
       shell: helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-      args:
-        executable: /bin/bash
       register: helmrepo_ingress
       changed_when: "'already exists' not in helmrepo_ingress.stdout"
 
     - name: Update Helm repositories
       shell: helm repo update
-      args:
-        executable: /bin/bash
 
     - name: Deploy Nginx Ingress Controller via Helm
       shell: |
@@ -90,15 +84,11 @@
     # A2: Step 22
     - name: Add kubernetes-dashboard Helm repository
       shell: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-      args:
-        executable: /bin/bash
       register: helmrepo_dash
       changed_when: "'already exists' not in helmrepo_ingress.stdout"
 
     - name: Update Helm repositories
       shell: helm repo update
-      args:
-        executable: /bin/bash
 
     - name: Deploy Kubernetes Dashboard via Helm
       shell: |
@@ -123,7 +113,7 @@
 
     - name: Create ClusterRoleBinding for admin-user
       shell: |
-        cat <<EOF | kubectl apply -f
+        cat <<EOF | kubectl apply -f -
         apiVersion: rbac.authorization.k8s.io/v1
         kind: ClusterRoleBinding
         metadata:
@@ -142,7 +132,7 @@
 
     - name: Create Ingress for Kubernetes Dashboard
       shell: |
-        cat <<EOF | kubectl apply -f
+        cat <<EOF | kubectl apply -f -
         apiVersion: networking.k8s.io/v1
         kind: Ingress
         metadata:
