@@ -6,7 +6,7 @@
   become: true
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
-
+    
   vars:
     metallb_url: "https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml"  # according to assignment
     metallb_crd: "/tmp/metallb-native.yaml"
@@ -14,94 +14,104 @@
     
   tasks:
     # A2: Step 20
-    # - name: Download MetalLB CRDs
-    #   get_url:
-    #     url: "{{ metallb_url }}"
-    #     dest: "{{ metallb_crd }}"
-    #     mode: '0644'
+    - name: Download MetalLB CRDs
+      get_url:
+        url: "{{ metallb_url }}"
+        dest: "{{ metallb_crd }}"
+        mode: '0644'
 
-    # - name: Apply MetalLB CRDs
-    #   shell: "kubectl apply -f {{ metallb_crd }}"
-    #   register: crd_apply
-    #   changed_when: "'created' in crd_apply.stdout or 'configured' in crd_apply.stdout"
+    - name: Apply MetalLB CRDs
+      shell: "kubectl apply -f {{ metallb_crd }}"
+      register: crd_apply
+      changed_when: "'created' in crd_apply.stdout or 'configured' in crd_apply.stdout"
 
-    # - name: Create MetalLB IPAddressPool
-    #   shell: |
-    #     cat <<EOF | kubectl apply -f -
-    #     apiVersion: metallb.io/v1beta1
-    #     kind: IPAddressPool
-    #     metadata:
-    #       name: default-pool
-    #       namespace: metallb-system
-    #     spec:
-    #       addresses:
-    #       - "{{ ip_pool_range }}"
-    #     EOF
-    #   register: ippool_apply
-    #   changed_when: "'created' in ippool_apply.stdout or 'configured' in ippool_apply.stdout"
+    - name: Wait for MetalLB controller
+      shell: |
+        kubectl wait -n metallb-system \
+          -l app=metallb,component=controller \
+          --for=condition=ready pod --timeout=60s
+      register: metallb_ready
 
-    # - name: Create MetalLB L2Advertisement
-    #   shell: |
-    #     cat <<EOF | kubectl apply -f -
-    #     apiVersion: metallb.io/v1beta1
-    #     kind: L2Advertisement
-    #     metadata:
-    #       name: l2-adv
-    #       namespace: metallb-system
-    #     spec:
-    #       ipAddressPools:
-    #       - default-pool
-    #     EOF
-    #   args:
-    #     executable: /bin/bash
-    #   register: l2adv_apply
-    #   changed_when: "'created' in l2adv_apply.stdout or 'configured' in l2adv_apply.stdout"
+    - name: Create MetalLB IPAddressPool
+      shell: |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: metallb.io/v1beta1
+        kind: IPAddressPool
+        metadata:
+          name: default-pool
+          namespace: metallb-system
+        spec:
+          addresses:
+          - "{{ ip_pool_range }}"
+        EOF
+      register: ippool_apply
+      changed_when: "'created' in ippool_apply.stdout or 'configured' in ippool_apply.stdout"
 
-    # - name: Wait for MetalLB controller to be ready
-    #   shell: |
-    #     kubectl wait -n metallb-system \
-    #       -l app=metallb,component=controller \
-    #       --for=condition=ready pod --timeout=60s
+    - name: Create MetalLB L2Advertisement
+      shell: |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: metallb.io/v1beta1
+        kind: L2Advertisement
+        metadata:
+          name: l2-adv
+          namespace: metallb-system
+        spec:
+          ipAddressPools:
+          - default-pool
+        EOF
+      args:
+        executable: /bin/bash
+      register: l2adv_apply
+      changed_when: "'created' in l2adv_apply.stdout or 'configured' in l2adv_apply.stdout"
 
     # A2: Step 21
     - name: Add ingress-nginx Helm repository
       shell: helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+      args:
+        executable: /bin/bash
       register: helmrepo_ingress
-      changed_when: "'already exists' not in helmrepo_ingress.stdout"
+      changed_when: "'ingress-nginx' in helmrepo_ingress.stdout"
 
     - name: Update Helm repositories
       shell: helm repo update
+      args:
+        executable: /bin/bash
+      changed_when: false
 
-    - name: Deploy Nginx Ingress Controller via Helm
+    - name: Install Nginx Ingress Controller via Helm
       shell: |
-        helm install ingress-nginx ingress-nginx/ingress-nginx \
-          --namespace ingress-nginx --create-namespace
+        helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+          --namespace ingress-nginx --create-namespace \
+          {% if ingress_ip is defined %}--set controller.service.loadBalancerIP={{ ingress_ip }}{% endif %}
       args:
         executable: /bin/bash
       register: helm_install_ingress
-      changed_when: "'STATUS: deployed' in helm_install_ingress.stdout"
+      changed_when: "'STATUS: deployed' in helm_install_ingress.stdout or 'STATUS: upgraded' in helm_install_ingress.stdout"
 
     # A2: Step 22
     - name: Add kubernetes-dashboard Helm repository
       shell: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       register: helmrepo_dash
-      changed_when: "'already exists' not in helmrepo_ingress.stdout"
+      changed_when: "'already exists' not in helmrepo_dash.stdout"
 
     - name: Update Helm repositories
       shell: helm repo update
+      args:
+        executable: /bin/bash
+      changed_when: false
 
     - name: Deploy Kubernetes Dashboard via Helm
       shell: |
-        helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+        helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
           --namespace kubernetes-dashboard --create-namespace
       args:
         executable: /bin/bash
       register: helm_install_dash
-      changed_when: "'STATUS: deployed' in helm_install_dash.stdout"
-
+      changed_when: "'STATUS: deployed' in helm_install_dash.stdout or 'STATUS: upgraded' in helm_install_dash.stdout"
+    
     - name: Create ServiceAccount for dashboard login
       shell: |
-        cat <<EOF | kubectl apply -f
+        cat <<EOF | kubectl apply -f -
         apiVersion: v1
         kind: ServiceAccount
         metadata:
@@ -157,11 +167,18 @@
         executable: /bin/bash
 
     # A2: Step 23: Install Istio via istioctl
+    - name: Download Istio CLI binary
+      get_url:
+        url: "https://github.com/istio/istio/releases/download/1.25.2/istio-1.25.2-linux-amd64.tar.gz"
+        dest: "/tmp/istio-1.25.2-linux-amd64.tar.gz"
+        mode: '0644'
+      register: istio_download
+
     - name: Install Istio CLI binary
       unarchive:
-        src: ./istio-1.25.2-linux-amd64.tar.gz
+        src: "/tmp/istio-1.25.2-linux-amd64.tar.gz"
         dest: /home/vagrant
-        remote_src: false
+        remote_src: true
       register: istio_unpacked
 
     - name: Add istioctl to PATH for vagrant
