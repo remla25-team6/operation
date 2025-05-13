@@ -186,10 +186,8 @@
         dest: /home/vagrant/.bashrc
         line: 'export PATH=$PATH:/home/vagrant/istio-1.25.2/bin'
       when: istio_unpacked.changed
-      register: istio_path
 
     - name: Run istioctl install
       command: istioctl instal
       args:
         chdir: /home/vagrant/istio-1.25.2
-      when: istio_path.changed
