@@ -4,13 +4,14 @@
 - name: Finalize Kubernetes cluster setup from finalization workbook
   hosts: 192.168.56.100
   become: true
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
 
   vars:
     metallb_url: "https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml"  # according to assignment
     metallb_crd: "/tmp/metallb-native.yaml"
     ip_pool_range: "192.168.56.90-192.168.56.99"  # According to assignment
-    kubeconfig_src: "/etc/kubernetes/admin.conf"
-
+    
   tasks:
     # A2: Step 20
     - name: Download MetalLB CRDs
@@ -20,7 +21,7 @@
         mode: '0644'
 
     - name: Apply MetalLB CRDs
-      shell: kubectl apply -f "{{ metallb_crd }}" --kubeconfig="{{ kubeconfig_src }}" 
+      shell: kubectl apply -f
       register: crd_apply
       changed_when: "'created' in crd_apply.stdout or 'configured' in crd_apply.stdout"
 
@@ -28,11 +29,11 @@
       shell: |
         kubectl wait -n metallb-system \
           -l app=metallb,component=controller \
-          --for=condition=ready pod --timeout=60s --kubeconfig="{{ kubeconfig_src }}"
+          --for=condition=ready pod --timeout=60s
 
     - name: Create MetalLB IPAddressPool
       shell: |
-        cat <<EOF | kubectl apply -f - --kubeconfig="{{ kubeconfig_src }}"
+        cat <<EOF | kubectl apply -f
         apiVersion: metallb.io/v1beta1
         kind: IPAddressPool
         metadata:
@@ -49,7 +50,7 @@
 
     - name: Create MetalLB L2Advertisement
       shell: |
-        cat <<EOF | kubectl apply -f - --kubeconfig="{{ kubeconfig_src }}"
+        cat <<EOF | kubectl apply -f
         apiVersion: metallb.io/v1beta1
         kind: L2Advertisement
         metadata:
@@ -66,20 +67,20 @@
 
     # A2: Step 21
     - name: Add ingress-nginx Helm repository
-      shell: KUBECONFIG="{{ kubeconfig_src }}" helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+      shell: helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
       args:
         executable: /bin/bash
       register: helmrepo_ingress
       changed_when: "'already exists' not in helmrepo_ingress.stdout"
 
     - name: Update Helm repositories
-      shell: KUBECONFIG="{{ kubeconfig_src }}" helm repo update
+      shell: helm repo update
       args:
         executable: /bin/bash
 
     - name: Deploy Nginx Ingress Controller via Helm
       shell: |
-        KUBECONFIG="{{ kubeconfig_src }}" helm install ingress-nginx ingress-nginx/ingress-nginx \
+        helm install ingress-nginx ingress-nginx/ingress-nginx \
           --namespace ingress-nginx --create-namespace
       args:
         executable: /bin/bash
@@ -88,20 +89,20 @@
 
     # A2: Step 22
     - name: Add kubernetes-dashboard Helm repository
-      shell: KUBECONFIG="{{ kubeconfig_src }}" helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+      shell: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       args:
         executable: /bin/bash
       register: helmrepo_dash
       changed_when: "'already exists' not in helmrepo_ingress.stdout"
 
     - name: Update Helm repositories
-      shell: KUBECONFIG="{{ kubeconfig_src }}" helm repo update
+      shell: helm repo update
       args:
         executable: /bin/bash
 
     - name: Deploy Kubernetes Dashboard via Helm
       shell: |
-        KUBECONFIG="{{ kubeconfig_src }}" helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+        helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
           --namespace kubernetes-dashboard --create-namespace
       args:
         executable: /bin/bash
@@ -110,7 +111,7 @@
 
     - name: Create ServiceAccount for dashboard login
       shell: |
-        cat <<EOF | kubectl apply -f - --kubeconfig="{{ kubeconfig_src }}"
+        cat <<EOF | kubectl apply -f
         apiVersion: v1
         kind: ServiceAccount
         metadata:
@@ -122,7 +123,7 @@
 
     - name: Create ClusterRoleBinding for admin-user
       shell: |
-        cat <<EOF | kubectl apply -f - --kubeconfig="{{ kubeconfig_src }}"
+        cat <<EOF | kubectl apply -f
         apiVersion: rbac.authorization.k8s.io/v1
         kind: ClusterRoleBinding
         metadata:
@@ -141,7 +142,7 @@
 
     - name: Create Ingress for Kubernetes Dashboard
       shell: |
-        cat <<EOF | kubectl apply -f - --kubeconfig="{{ kubeconfig_src }}"
+        cat <<EOF | kubectl apply -f
         apiVersion: networking.k8s.io/v1
         kind: Ingress
         metadata:

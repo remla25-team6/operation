@@ -5,7 +5,8 @@ NUM_WORKERS = ENV.fetch("NUM_WORKERS", 2).to_i
 Vagrant.configure("2") do |config|
     # Define the base box to use
     config.vm.box = "bento/ubuntu-24.04"
-    
+    config.ssh.forward_agent = true    # Enable ssh forward agent
+
     # Control node configuration
     config.vm.define "ctrl" do |ctrl|
         ctrl.vm.provider "virtualbox" do |vb|
