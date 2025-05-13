@@ -1,7 +1,8 @@
 # node.yml
 ---
 # Ansible playbook for worker nodes
-- hosts: node-* 
+- name: Setting up worker node from node workbook
+  hosts: node-* 
   become: true
   tasks:
     - import_tasks: general.yml
