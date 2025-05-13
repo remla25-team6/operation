@@ -166,7 +166,7 @@
       args:
         executable: /bin/bash
 
-    # A2: Step 23: Install Istio via istioctl
+    # A2: Step 23
     - name: Download Istio CLI binary
       get_url:
         url: "https://github.com/istio/istio/releases/download/1.25.2/istio-1.25.2-linux-amd64.tar.gz"
@@ -186,9 +186,10 @@
         dest: /home/vagrant/.bashrc
         line: 'export PATH=$PATH:/home/vagrant/istio-1.25.2/bin'
       when: istio_unpacked.changed
+      register: istio_path
 
     - name: Run istioctl install
-      command: istioctl install --set profile=demo -y
+      command: istioctl instal
       args:
         chdir: /home/vagrant/istio-1.25.2
-      when: install_istio | default(false)
+      when: istio_path.changed
