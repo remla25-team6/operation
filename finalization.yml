@@ -167,12 +167,18 @@
         executable: /bin/bash
 
     # A2: Step 23
+    - name: Check if istioctl binary already exists
+      stat:
+        path: /home/vagrant/istio-1.25.2/bin/istioctl
+      register: istioctl_binary
+
     - name: Download Istio CLI binary
       get_url:
         url: "https://github.com/istio/istio/releases/download/1.25.2/istio-1.25.2-linux-amd64.tar.gz"
         dest: "/tmp/istio-1.25.2-linux-amd64.tar.gz"
         mode: '0644'
       register: istio_download
+      when: not istioctl_binary.stat.exists
 
     - name: Install Istio CLI binary
       unarchive:
@@ -180,14 +186,22 @@
         dest: /home/vagrant
         remote_src: true
       register: istio_unpacked
+      when: not istioctl_binary.stat.exists and istio_download is changed
 
     - name: Add istioctl to PATH for vagrant
       lineinfile:
         dest: /home/vagrant/.bashrc
         line: 'export PATH=$PATH:/home/vagrant/istio-1.25.2/bin'
-      when: istio_unpacked.changed
+      when: istio_unpacked is changed
+
+    - name: Check if Istio is already installed in the cluster
+      shell: kubectl get namespace istio-system
+      register: istio_namespace
+      failed_when: false
+      changed_when: false
 
     - name: Run istioctl install
-      command: istioctl instal
+      command: /home/vagrant/istio-1.25.2/bin/istioctl install --set profile=demo -y
       args:
         chdir: /home/vagrant/istio-1.25.2
+      when: (istio_unpacked is changed or (istio_namespace.rc != 0))
