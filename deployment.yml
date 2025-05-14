@@ -5,9 +5,9 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
 
   tasks:
-    - name: Copy Kubernetes manifest to remote
-      copy:
-        src: kubernetes/sentiment.yml
+    - name: Template Kubernetes setup file
+      template:
+        src: kubernetes/sentiment.yml.j2
         dest: /tmp/sentiment.yml
 
     - name: Kubernetes deployment

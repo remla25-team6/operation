@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: model-service
-          image: ghcr.io/remla25-team6/model-service:0.0.3-pre.20250506.194625
+          image: {{ MODEL_IMAGE }}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -50,13 +50,16 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/remla25-team6/app:0.0.4-pre.20250506.183739
+          image: {{ APP_IMAGE }}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           env:
             - name: MODEL_URL
-              value: http://model-service:8080
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap
+                  key: model.host
 ---
 apiVersion: v1
 kind: Service
@@ -81,4 +84,10 @@ spec:
       name: app
       port:
         number: 80
-
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap
+data:
+  model.host: {{ MODEL_URL }}
