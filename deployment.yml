@@ -10,6 +10,11 @@
         src: kubernetes/sentiment.yml.j2
         dest: /tmp/sentiment.yml
 
+    - name: Create /mnt/shared directory
+      file:
+        path: /mnt/shared
+        state: directory
+
     - name: Kubernetes deployment
       shell: kubectl apply -f /tmp/sentiment.yml
       register: kubectl_apply_output

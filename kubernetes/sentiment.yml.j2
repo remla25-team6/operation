@@ -20,6 +20,13 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+          volumeMounts:
+            - mountPath: /mnt/shared
+              name: my-volume
+      volumes:
+        - name: my-volume
+          hostPath:
+            path: /mnt/shared/
 ---
 apiVersion: v1
 kind: Service
@@ -91,3 +98,10 @@ metadata:
   name: configmap
 data:
   model.host: {{ MODEL_URL }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-secret
+data:
+  foo: PGV4YW1wbGVfc2VjcmV0Pg==
