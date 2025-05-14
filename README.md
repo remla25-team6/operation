@@ -4,17 +4,20 @@
 From the root directory:
 
 With docker:
-- `echo your_personal_access_token | docker login ghcr.io -u your_github_username --password-stdin` to login
-- `docker compose up` to start the application.
+- `echo your_personal_access_token | docker login ghcr.io -u your_github_username --password-stdin` - to login
+- `docker compose up` - to start the application
 - Access at: http://127.0.0.1:8080/
-- `docker compose down` to stop the application.
+- `docker compose down` - to stop the application
 
 With Kubernetes:
 - `vagrant up` - to start vagrant and provision
 - `ansible-playbook -u vagrant -i 192.168.56.100, finalization.yml` - to run final provisioning steps
 - `export $(cat .env | xargs)` - to set env variables (app/model images and model service URL)
 - `ansible-playbook -u vagrant -i 192.168.56.100, deployment.yml -e "MODEL_IMAGE=$MODEL_IMAGE APP_IMAGE=$APP_IMAGE MODEL_URL=$MODEL_URL"` - to apply the Kubernetes config
-
+- Access at: http://192.168.56.90:80/. Under some conditions the app may not be reachable at this IP, in that case:
+- `vagrant ssh ctrl` - to ssh into the control node
+- `kubectl get svc -n ingress-nginx` - and find the external IP you can access the app from
+- `vagrant halt` - to stop the application
 ## Repositories
 Below we list the repositories in our system, along with pointers to relevant files within each repository.
 
