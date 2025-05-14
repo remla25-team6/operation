@@ -1,0 +1,25 @@
+- name: Deploy Kubernetes app
+  hosts: all
+  become: true
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+  tasks:
+    - name: Copy Kubernetes manifest to remote
+      copy:
+        src: kubernetes/sentiment.yml
+        dest: /tmp/sentiment.yml
+
+    - name: Kubernetes deployment
+      shell: kubectl apply -f /tmp/sentiment.yml
+      register: kubectl_apply_output
+      ignore_errors: yes
+
+    - name: Display the output of kubectl apply
+      debug:
+        var: kubectl_apply_output.stdout_lines
+
+    - name: Display the error output if apply fails
+      debug:
+        var: kubectl_apply_output.stderr_lines
+      when: kubectl_apply_output.stderr_lines is defined
