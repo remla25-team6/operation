@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-model-service
+  labels:
+    app: {{ .Release.Name }}-model-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-model-service
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-model-service
+    spec:
+      containers:
+        - name: model-service
+          image: {{ .Values.model.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /mnt/shared
+              name: my-volume
+      volumes:
+        - name: my-volume
+          hostPath:
+            path: {{ .Values.sharedVolume.path }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-model-service
+spec:
+  selector:
+    app: {{ .Release.Name }}-model-service
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-app
+  labels:
+    app: {{ .Release.Name }}-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-app
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-app
+    spec:
+      containers:
+        - name: app
+          image: {{ .Values.app.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MODEL_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-configmap
+                  key: model.host
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-app
+spec:
+  selector:
+    app: {{ .Release.Name }}-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+spec:
+  ingressClassName: nginx
+  defaultBackend:
+    service:
+      name: {{ .Release.Name }}-app
+      port:
+        number: 80
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  model.host: {{ .Values.model.url }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-secret
+data:
+  foo: {{ .Values.secret.foo }}
