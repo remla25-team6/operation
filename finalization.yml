@@ -2,10 +2,12 @@
 ---
 # Ansible playbook for finalizing steps
 - name: Finalize Kubernetes cluster setup from finalization workbook
-  hosts: all
+  hosts: 192.168.56.100
   become: true
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
+  collection:
+    - kubernetes.core
     
   vars:
     metallb_url: "https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml"  # according to assignment
@@ -13,6 +15,17 @@
     ip_pool_range: "192.168.56.90-192.168.56.99"  # According to assignment
     
   tasks:
+    # Install kubernetes (python) module
+    - name: Ensure pip is installed
+      apt:
+        name: python3-pip
+        state: present
+        
+    - name: Install Python kubernetes module
+      pip:
+        name: kubernetes
+        state: present
+
     # A2: Step 20
     - name: Download MetalLB CRDs
       get_url:

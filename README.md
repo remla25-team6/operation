@@ -11,6 +11,7 @@ With docker:
 
 With Kubernetes:
 - `vagrant up` - to start vagrant and provision
+- `ansible-galaxy collection install -r requirements.yml` - to install the required ansible collections
 - `ansible-playbook -u vagrant -i 192.168.56.100, finalization.yml` - to run final provisioning steps
 - `export $(cat .env | xargs)` - to set env variables (app/model images and model service URL)
 - `ansible-playbook -u vagrant -i 192.168.56.100, deployment.yml -e "MODEL_IMAGE=$MODEL_IMAGE APP_IMAGE=$APP_IMAGE MODEL_URL=$MODEL_URL"` - to apply the Kubernetes config
