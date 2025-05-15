@@ -60,7 +60,7 @@
 - Approved PR:
 
 ### Inaesh: 
-- Created PR:
+- Created PR: https://github.com/remla25-team6/operation/pull/24
 - Approved PR: https://github.com/remla25-team6/operation/pull/17
 
 ### Maarten
