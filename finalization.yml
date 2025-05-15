@@ -37,7 +37,7 @@
       shell: |
         kubectl wait -n metallb-system \
           -l app=metallb,component=controller \
-          --for=condition=ready pod --timeout=180s
+          --for=condition=ready pod --timeout=240s
       register: metallb_ready
 
     - name: Create MetalLB IPAddressPool
@@ -73,8 +73,10 @@
         repo_url: https://kubernetes.github.io/ingress-nginx
 
     - name: Update Helm repositories
-      kubernetes.core.helm_repository_update:
-        update_repos: all
+      shell: helm repo update
+      args:
+        executable: /bin/bash
+      changed_when: false
 
     - name: Install Nginx Ingress Controller via Helm
       kubernetes.core.helm:
