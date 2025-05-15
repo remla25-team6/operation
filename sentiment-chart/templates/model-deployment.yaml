@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-model-service
+  labels:
+    app: {{ .Release.Name }}-model-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-model-service
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-model-service
+    spec:
+      containers:
+        - name: model-service
+          image: {{ .Values.model.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /mnt/shared
+              name: my-volume
+      volumes:
+        - name: my-volume
+          hostPath:
+            path: {{ .Values.sharedVolume.path }}
