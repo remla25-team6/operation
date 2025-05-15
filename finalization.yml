@@ -8,7 +8,7 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
   collection:
     - kubernetes.core
-    
+
   vars:
     metallb_url: "https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml"  # according to assignment
     metallb_crd: "/tmp/metallb-native.yaml"
@@ -34,9 +34,9 @@
         mode: '0644'
 
     - name: Apply MetalLB CRDs
-      shell: "kubectl apply -f {{ metallb_crd }}"
-      register: crd_apply
-      changed_when: "'created' in crd_apply.stdout or 'configured' in crd_apply.stdout"
+      kubernetes.core.k8s:
+        state: present
+        src: "{{ metallb_crd }}"
 
     - name: Wait for MetalLB controller
       shell: |
@@ -46,60 +46,48 @@
       register: metallb_ready
 
     - name: Create MetalLB IPAddressPool
-      shell: |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: metallb.io/v1beta1
-        kind: IPAddressPool
-        metadata:
-          name: default-pool
-          namespace: metallb-system
-        spec:
-          addresses:
-          - "{{ ip_pool_range }}"
-        EOF
-      register: ippool_apply
-      changed_when: "'created' in ippool_apply.stdout or 'configured' in ippool_apply.stdout"
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: metallb.io/v1beta1
+          kind: IPAddressPool
+          metadata:
+            name: default-pool
+            namespace: metallb-system
+          spec:
+            addresses:
+            - "{{ ip_pool_range }}"
 
     - name: Create MetalLB L2Advertisement
-      shell: |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: metallb.io/v1beta1
-        kind: L2Advertisement
-        metadata:
-          name: l2-adv
-          namespace: metallb-system
-        spec:
-          ipAddressPools:
-          - default-pool
-        EOF
-      args:
-        executable: /bin/bash
-      register: l2adv_apply
-      changed_when: "'created' in l2adv_apply.stdout or 'configured' in l2adv_apply.stdout"
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: metallb.io/v1beta1
+          kind: L2Advertisement
+          metadata:
+            name: l2-adv
+            namespace: metallb-system
+          spec:
+            ipAddressPools:
+            - default-pool
 
     # A2: Step 21
     - name: Add ingress-nginx Helm repository
-      shell: helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-      args:
-        executable: /bin/bash
-      register: helmrepo_ingress
-      changed_when: "'ingress-nginx' in helmrepo_ingress.stdout"
+      kubernetes.core.helm_repository:
+        name: ingress-nginx
+        repo_url: https://kubernetes.github.io/ingress-nginx
 
     - name: Update Helm repositories
-      shell: helm repo update
-      args:
-        executable: /bin/bash
-      changed_when: false
+      kubernetes.core.helm_repository_update:
+        update_repos: all
 
     - name: Install Nginx Ingress Controller via Helm
-      shell: |
-        helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
-          --namespace ingress-nginx --create-namespace \
-          {% if ingress_ip is defined %}--set controller.service.loadBalancerIP={{ ingress_ip }}{% endif %}
-      args:
-        executable: /bin/bash
-      register: helm_install_ingress
-      changed_when: "'STATUS: deployed' in helm_install_ingress.stdout or 'STATUS: upgraded' in helm_install_ingress.stdout"
+      kubernetes.core.helm:
+        name: ingress-nginx
+        chart_ref: ingress-nginx/ingress-nginx
+        release_namespace: ingress-nginx
+        create_namespace: true
+        values: "{{ {'controller': {'service': {'loadBalancerIP': ingress_ip}}} if ingress_ip is defined else {} }}"
 
     # A2: Step 22
     - name: Add kubernetes-dashboard Helm repository
