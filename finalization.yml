@@ -42,7 +42,7 @@
       shell: |
         kubectl wait -n metallb-system \
           -l app=metallb,component=controller \
-          --for=condition=ready pod --timeout=60s
+          --for=condition=ready pod --timeout=180s
       register: metallb_ready
 
     - name: Create MetalLB IPAddressPool
@@ -91,81 +91,67 @@
 
     # A2: Step 22
     - name: Add kubernetes-dashboard Helm repository
-      shell: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-      register: helmrepo_dash
-      changed_when: "'already exists' not in helmrepo_dash.stdout"
-
-    - name: Update Helm repositories
-      shell: helm repo update
-      args:
-        executable: /bin/bash
-      changed_when: false
+      kubernetes.core.helm_repository:
+        name: kubernetes-dashboard
+        repo_url: https://kubernetes.github.io/dashboard/
 
     - name: Deploy Kubernetes Dashboard via Helm
-      shell: |
-        helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
-          --namespace kubernetes-dashboard --create-namespace
-      args:
-        executable: /bin/bash
-      register: helm_install_dash
-      changed_when: "'STATUS: deployed' in helm_install_dash.stdout or 'STATUS: upgraded' in helm_install_dash.stdout"
-    
+      kubernetes.core.helm:
+        name: kubernetes-dashboard
+        chart_ref: kubernetes-dashboard/kubernetes-dashboard
+        release_namespace: kubernetes-dashboard
+        create_namespace: true
+
     - name: Create ServiceAccount for dashboard login
-      shell: |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: ServiceAccount
-        metadata:
-          name: admin-user
-          namespace: kubernetes-dashboard
-        EOF
-      args:
-        executable: /bin/bash
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: admin-user
+            namespace: kubernetes-dashboard
 
     - name: Create ClusterRoleBinding for admin-user
-      shell: |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: rbac.authorization.k8s.io/v1
-        kind: ClusterRoleBinding
-        metadata:
-          name: admin-user-binding
-        roleRef:
-          apiGroup: rbac.authorization.k8s.io
-          kind: ClusterRole
-          name: cluster-admin
-        subjects:
-        - kind: ServiceAccount
-          name: admin-user
-          namespace: kubernetes-dashboard
-        EOF
-      args:
-        executable: /bin/bash
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          metadata:
+            name: admin-user-binding
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: cluster-admin
+          subjects:
+          - kind: ServiceAccount
+            name: admin-user
+            namespace: kubernetes-dashboard
 
     - name: Create Ingress for Kubernetes Dashboard
-      shell: |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: networking.k8s.io/v1
-        kind: Ingress
-        metadata:
-          name: kubernetes-dashboard-ingress
-          namespace: kubernetes-dashboard
-          annotations:
-            nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-        spec:
-          rules:
-          - host: dashboard.local
-            http:
-              paths:
-              - path: /
-                pathType: Prefix
-                backend:
-                  service:
-                    name: kubernetes-dashboard
-                    port:
-                      number: 443
-        EOF
-      args:
-        executable: /bin/bash
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kubernetes-dashboard-ingress
+            namespace: kubernetes-dashboard
+            annotations:
+              nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+          spec:
+            rules:
+            - host: dashboard.local
+              http:
+                paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: kubernetes-dashboard
+                      port:
+                        number: 443
 
     # A2: Step 23
     - name: Check if istioctl binary already exists
@@ -196,13 +182,14 @@
       when: istio_unpacked is changed
 
     - name: Check if Istio is already installed in the cluster
-      shell: kubectl get namespace istio-system
+      kubernetes.core.k8s_info:
+        kind: Namespace
+        name: istio-system
       register: istio_namespace
       failed_when: false
-      changed_when: false
 
     - name: Run istioctl install
       command: /home/vagrant/istio-1.25.2/bin/istioctl install --set profile=demo -y
       args:
         chdir: /home/vagrant/istio-1.25.2
-      when: (istio_unpacked is changed or (istio_namespace.rc != 0))
+      when: (istio_unpacked is changed or (istio_namespace.resources | length == 0))
