@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-configmap
 data:
-  model.host: {{ .Values.model.url }}
+  model.host: http://{{ .Release.Name }}-{{ .Values.model.host }}
