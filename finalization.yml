@@ -29,7 +29,7 @@
       shell: |
         kubectl wait -n metallb-system \
           -l app=metallb,component=controller \
-          --for=condition=ready pod --timeout=60s
+          --for=condition=ready pod --timeout=180s
       register: metallb_ready
 
     - name: Create MetalLB IPAddressPool
