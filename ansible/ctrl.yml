@@ -71,6 +71,7 @@
         url: "{{ flannel_url }}"
         dest: "{{ flannel_tmp }}"
         mode: '0644'
+        force: no # only fetch if missing (if stat doesnt work correctly)
       when: not flannel_pres.stat.exists
 
     - name: Inject --iface into Flannel DaemonSet args
@@ -79,11 +80,17 @@
         regexp: '^(\s*)- --ip-masq$'
         replace: '\1- --ip-masq\n\1- --iface={{ flannel_iface }}'
 
+    - name: Wait for Kubernetes API to be ready
+      wait_for:
+        host: "{{ apiserver_addr }}"
+        port: 6443
+        timeout: 180
 
     - name: Apply Flannel network manifest
       shell: >
         kubectl apply -f {{ flannel_tmp }}
         --kubeconfig {{ kubeconfig_src }}
+        --validate=false
 
     # A2: Step 16
     - name: Add Helm signing key
@@ -100,6 +107,7 @@
     - name: Update apt cache
       ansible.builtin.apt:
         update_cache: yes
+        cache_valid_time: 3600   # skip update if cache is <1h old
 
     - name: Install Helm package
       ansible.builtin.apt:
@@ -116,3 +124,39 @@
     - name: Install helm-diff if not installed
       shell: helm plugin install https://github.com/databus23/helm-diff
       when: "'diff' not in helm_plugins.stdout"  
+    
+    - name: Add Prometheus community Helm repository
+      kubernetes.core.helm_repository:
+        name: prometheus-community
+        repo_url: https://prometheus-community.github.io/helm-charts
+        state: present
+
+
+    - name: Ensure Prometheus Operator CRDs are present
+      kubernetes.core.helm:
+        name: test
+        chart_ref: prometheus-community/prometheus-operator-crds
+        release_namespace: default
+        state: present
+        kubeconfig: /etc/kubernetes/admin.conf 
+        skip_crds: yes
+        update_repo_cache: true
+ 
+#    - name: Deploy our application chart
+#      kubernetes.core.helm:
+#        name: test-release-appS
+#        chart_ref: /vagrant/charts/sentiment-chart
+#        release_namespace: monitoring
+#        wait: true
+#        kube_context: /etc/kubernetes/admin.conf 
+#        values_filess: 
+#          - /vagrant/values.yaml
+#
+
+
+  handlers:
+  - name: Restart containerd
+    service: 
+      name: containerd
+      state: restarted
+      enabled: yes

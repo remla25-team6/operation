@@ -20,3 +20,9 @@
       shell: "{{ join_command.stdout }} --ignore-preflight-errors=all"
       args:
         creates: /etc/kubernetes/kubelet.conf
+  handlers:
+  - name: Restart containerd
+    service: 
+      name: containerd
+      state: restarted
+      enabled: yes
