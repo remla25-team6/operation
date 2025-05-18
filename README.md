@@ -1,9 +1,29 @@
 # CS4295 - Team 6 Project
 
+## Documentation overview
+
+* [Starting the application](#starting-the-application)
+
+  * [With Docker](#with-docker)
+  * [With Kubernetes](#with-kubernetes)
+
+    * [1. Provision the cluster (required for both manual and Helm deployments)](#1-provision-the-cluster-required-for-both-manual-and-helm-deployments)
+    * [2. Choose one of the following deployment methods](#2-choose-one-of-the-following-deployment-methods)
+
+      * [A. Manual deployment with Ansible and raw Kubernetes manifests](#a-manual-deployment-with-ansible-and-raw-kubernetes-manifests)
+      * [B. Deployment using Helm](#b-deployment-using-helm)
+
+        * [Option 1: With Vagrant](#option-1-with-vagrant)
+        * [Option 2: With Minikube](#option-2-with-minikube)
+* [Access the Application](#access-the-application)
+* [Repositories overview](#repositories)
+
 ## Starting the application
+
 From the root directory:
 
-### With Docker:
+### With Docker
+
 ```bash
 echo your_personal_access_token | docker login ghcr.io -u your_github_username --password-stdin     # Login
 docker compose up          # Start the application
@@ -15,33 +35,24 @@ Access the app at: [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
 ### With Kubernetes
 
 #### 1. Provision the cluster (required for both manual and Helm deployments)
+
 ```bash
 vagrant up  # Start vagrant and provision
-ansible-galaxy collection install -r requirements.yml # Install required Ansible collections
 ansible-playbook -u vagrant --private-key=.vagrant/machines/ctrl/virtualbox/private_key -i 192.168.56.100, finalization.yml  # Run final provisioning steps
 ```
 
-#### 1b. To open the Kubernetes Dashboard without tunnel or port-forwarding:
-- Add `192.168.56.91 dashboard.local` to your /etc/hosts file (Linux, macOS) or to
-C:\Windows\System32\drivers\etc\hosts (Windows). Changing the entries can require a flush of the DNS cache:
-    - sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder (macOS)
-    - sudo systemd-resolve --flush-caches (Linux/systemd)
-    - ipconfig /flushdns (Windows)
-- A token can be manually created on the control machine using: `kubectl -n kubernetes-dashboard create token admin-user`
-- Visit https://dashboard.local/ (https is important) and login using the token created in the previous step 
-
 #### 2. Choose one of the following deployment methods:
 
-#### A. Manual deployment with Ansible and raw Kubernetes manifests
+##### A. Manual deployment with Ansible and raw Kubernetes manifests
 
 ```bash
 export $(cat .env | xargs)  # Setup environment variables (app/model images and model service URL)
 ansible-playbook -u vagrant -i 192.168.56.100, deployment.yml -e "MODEL_IMAGE=$MODEL_IMAGE APP_IMAGE=$APP_IMAGE MODEL_URL=$MODEL_URL"  # Apply Kubernetes config
 ```
 
-#### B. Deployment using Helm
+##### B. Deployment using Helm
 
-**Option 1: With Vagrant**
+###### Option 1: With Vagrant
 
 ```bash
 vagrant ssh ctrl  # SSH into control node
@@ -49,7 +60,7 @@ cd /vagrant/sentiment-chart  # Navigate to synced Helm chart repository
 helm install <release-name> .   # Install the application using the Helm chart with desired release name (Helm chart can be installed more than once into the same cluster with different names)
 ```
 
-**Option 2: With Minikube**
+###### Option 2: With Minikube
 
 ```bash
 minikube start  # Start minikube
@@ -58,7 +69,9 @@ helm install <release-name> .  # Install the application using the Helm chart wi
 ```
 
 ## Access the Application
+
 After starting the application:
+
 * Access at: [http://192.168.56.90:80/](http://192.168.56.90:80/)
 * Under some conditions the app may not be reachable at this IP. If the app is not reachable:
 
@@ -71,6 +84,7 @@ After starting the application:
   ```bash
   vagrant halt
   ```
+
   
 ## Repositories
 Below we list the repositories in our system, along with pointers to relevant files within each repository.
