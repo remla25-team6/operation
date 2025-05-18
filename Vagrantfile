@@ -1,5 +1,5 @@
 # Vagrantfile
-WORKER_MEMORY = ENV.fetch("WORKER_MEM", 4096).to_i
+WORKER_MEMORY = ENV.fetch("WORKER_MEM", 2048).to_i
 NUM_WORKERS = ENV.fetch("NUM_WORKERS", 2).to_i
 shared_folder_path = File.expand_path("./shared")
 
@@ -11,8 +11,8 @@ Vagrant.configure("2") do |config|
     # Control node configuration
     config.vm.define "ctrl" do |ctrl|
         ctrl.vm.provider "virtualbox" do |vb|
-            vb.memory = 4048
-            vb.cpus = 2
+            vb.memory = 8196
+            vb.cpus = 4
         end
         ctrl.vm.network "private_network", ip: "192.168.56.100"
         ctrl.vm.hostname = "ctrl"

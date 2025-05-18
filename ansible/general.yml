@@ -108,23 +108,24 @@
     path: /etc/containerd/config.toml
     regexp: '^\s*disable_apparmor\s*='
     line: '    disable_apparmor = true'
-  notify: Restart containerd
 
 - name: Set sandbox_image to registry.k8s.io/pause:3.10
   lineinfile:
     path: /etc/containerd/config.toml
     regexp: '^\s*sandbox_image\s*='
     line: '    sandbox_image = "registry.k8s.io/pause:3.10"'
-  notify: Restart containerd
 
 - name: Enable SystemdCgroup for runc
   lineinfile:
     path: /etc/containerd/config.toml
     regexp: '^\s*SystemdCgroup\s*='
     line: '            SystemdCgroup = true'
-  notify: Restart containerd
 
-
+- name: Restart containerd
+  service: 
+    name: containerd
+    state: restarted
+    enabled: yes
 # A2: Step 12
 - name: Register kubelet for auto-start
   service:

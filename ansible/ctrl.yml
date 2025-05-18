@@ -19,80 +19,98 @@
   tasks:
     - import_tasks: general.yml
 
-    # A2: Step 13
     - name: Check for /etc/kubernetes/admin.conf
-      stat: 
-        path: /etc/kubernetes/admin.conf
+      stat:
+        path: "{{ kubeconfig_src }}"
       register: admin_conf
 
-    - name: Initialize kubernetes iff admin.conf is absent
-      shell: |
-        kubeadm init \
-          --apiserver-advertise-address={{ apiserver_addr }} \
-          --node-name={{ ctrl_name }} \
-          --pod-network-cidr={{ pod_cidr }}
-      args:
-        creates: /etc/kubernetes/admin.conf
-      when: not admin_conf.stat.exists
-    
-    # A2: Step 14
-    - name: Create .kube directory
-      file:
-        path: "{{ kubeconfig_user_path | dirname }}"
-        state: directory
-        owner: vagrant
-        group: vagrant
-        mode: '0755'
-    
-    - name: Copy admin.conf to vagrant user's .kube
-      copy:
-        src: "{{ kubeconfig_src }}"
-        dest: "{{ kubeconfig_user_path }}"
-        remote_src: true
-        owner: vagrant
-        group: vagrant
-        mode: '0644'
+    # --- Block for Kubernetes Initialization (runs only if admin.conf is absent) ---
+    - name: Initialize Kubernetes Control Plane and CNI
+      block:
+        - name: Run kubeadm init
+          ansible.builtin.shell: |
+            kubeadm init \
+              --apiserver-advertise-address={{ apiserver_addr }} \
+              --node-name={{ ctrl_name }} \
+              --pod-network-cidr={{ pod_cidr }}
+          args:
+            creates: "{{ kubeconfig_src }}" 
 
-    - name: Publish admin.conf to host via /vagrant
-      copy:
-        src: "{{ kubeconfig_src }}"
-        dest: /vagrant/admin.conf
-        remote_src: true
-        mode: '0644'
-        
-    # A2: Step 15
-    - name: Check if Flannel manifest is present
-      stat:
-        path: "{{ flannel_url }}"
-      register: flannel_pres
+        - name: Create .kube directory for vagrant user
+          ansible.builtin.file:
+            path: "{{ kubeconfig_user_path | dirname }}"
+            state: directory
+            owner: vagrant
+            group: vagrant
+            mode: '0755'
 
-    - name: Download Flannel manifest
-      get_url:
-        url: "{{ flannel_url }}"
-        dest: "{{ flannel_tmp }}"
-        mode: '0644'
-        force: no # only fetch if missing (if stat doesnt work correctly)
-      when: not flannel_pres.stat.exists
+        - name: Copy admin.conf to vagrant user's .kube
+          ansible.builtin.copy:
+            src: "{{ kubeconfig_src }}"
+            dest: "{{ kubeconfig_user_path }}"
+            remote_src: true
+            owner: vagrant
+            group: vagrant
+            mode: '0644'
 
-    - name: Inject --iface into Flannel DaemonSet args
-      ansible.builtin.replace:
-        path: "{{ flannel_tmp }}"
-        regexp: '^(\s*)- --ip-masq$'
-        replace: '\1- --ip-masq\n\1- --iface={{ flannel_iface }}'
+        - name: Publish admin.conf to host via /vagrant
+          ansible.builtin.copy:
+            src: "{{ kubeconfig_src }}"
+            dest: "/vagrant/admin.conf"
+            remote_src: true
+            mode: '0644'
+          ignore_errors: true # In case /vagrant doesn't exist or isn't writable
 
-    - name: Wait for Kubernetes API to be ready
-      wait_for:
-        host: "{{ apiserver_addr }}"
-        port: 6443
-        timeout: 180
+        - name: Wait for API server to be initially available after kubeadm init
+          ansible.builtin.wait_for:
+            host: "{{ apiserver_addr }}"
+            port: 6443
+            delay: 10  # Initial delay before first check
+            timeout: 180 # Total timeout
+            state: started # Wait for port to be open
+          vars:
+            ansible_python_interpreter: /usr/bin/python3 # wait_for can sometimes be picky
 
-    - name: Apply Flannel network manifest
-      shell: >
-        kubectl apply -f {{ flannel_tmp }}
-        --kubeconfig {{ kubeconfig_src }}
-        --validate=false
+        - name: Download Flannel manifest (if not already present)
+          ansible.builtin.get_url:
+            url: "{{ flannel_url }}"
+            dest: "{{ flannel_tmp }}"
+            mode: '0644'
+            force: no # Only download if dest doesn't exist or if force=yes
+          # when: not flannel_pres.stat.exists # Your original stat check was fine too
 
-    # A2: Step 16
+        - name: Inject --iface into Flannel DaemonSet args
+          ansible.builtin.replace:
+            path: "{{ flannel_tmp }}"
+            regexp: '^(\s*)- --ip-masq$'
+            replace: '\1- --ip-masq\n\1- --iface={{ flannel_iface }}'
+
+        - name: Apply Flannel network manifest
+          ansible.builtin.command: # Using command for kubectl apply
+            cmd: "kubectl apply -f {{ flannel_tmp }} --kubeconfig {{ kubeconfig_src }}"
+          changed_when: true # Assume this makes changes; more robust would be to check output
+
+        #- name: Wait for Flannel pods to be ready
+        #  ansible.builtin.command:
+        #    cmd: "kubectl wait --for=condition=ready pod -l app=flannel -n kube-flannel --timeout=300s --kubeconfig {{ kubeconfig_src }}"
+        #  register: flannel_status
+        #  until: flannel_status.rc == 0
+        #  retries: 6
+        #  delay: 30
+        #  changed_when: false 
+
+      when: not admin_conf.stat.exists 
+
+    #- name: Wait for CoreDNS pods in kube-system to be ready
+    #  ansible.builtin.command:
+    #    cmd: "kubectl wait --for=condition=ready pod -l k8s-app=kube-dns -n kube-system --timeout=300s --kubeconfig {{ kubeconfig_src }}"
+    #  register: coredns_status
+    #  until: coredns_status.rc == 0
+    #  retries: 6
+    #  delay: 20
+    #  changed_when: false
+
+    # --- Helm and Application Stack Deployment ---
     - name: Add Helm signing key
       ansible.builtin.apt_key:
         url: https://baltocdn.com/helm/signing.asc
@@ -103,60 +121,87 @@
         repo: deb https://baltocdn.com/helm/stable/debian/ all main
         state: present
         filename: helm-stable
-    
-    - name: Update apt cache
+
+    - name: Update apt cache (runs if cache is older than 1 hour)
       ansible.builtin.apt:
         update_cache: yes
-        cache_valid_time: 3600   # skip update if cache is <1h old
+        cache_valid_time: 3600
 
     - name: Install Helm package
       ansible.builtin.apt:
         name: helm
         state: present
 
-    # A2: Step 17
-    # Used ChatGPT-4o to figure out how to skip re-installing the helm-diff plugin during re-provisioning
     - name: Get list of installed helm plugins
-      command: helm plugin list
+      ansible.builtin.command: helm plugin list
       register: helm_plugins
       changed_when: false
+      environment: 
+        KUBECONFIG: "{{ kubeconfig_user_path }}" 
 
-    - name: Install helm-diff if not installed
-      shell: helm plugin install https://github.com/databus23/helm-diff
-      when: "'diff' not in helm_plugins.stdout"  
-    
+    - name: Install helm-diff plugin if not already installed
+      ansible.builtin.command: helm plugin install https://github.com/databus23/helm-diff
+      when: "'diff' not in helm_plugins.stdout"
+      environment:
+        KUBECONFIG: "{{ kubeconfig_user_path }}"
+
     - name: Add Prometheus community Helm repository
-      kubernetes.core.helm_repository:
+      kubernetes.core.helm_repository: 
         name: prometheus-community
         repo_url: https://prometheus-community.github.io/helm-charts
         state: present
+        kubeconfig: "{{ kubeconfig_src }}" 
 
-
-    - name: Ensure Prometheus Operator CRDs are present
+    - name: Update Helm repositories
+      ansible.builtin.command: helm repo update
+      changed_when: false 
+      environment:
+        KUBECONFIG: "{{ kubeconfig_user_path }}" 
+  
+    - name: Deploy kube-prometheus-stack with dynamic LoadBalancer IPs and increased timeout
       kubernetes.core.helm:
-        name: test
-        chart_ref: prometheus-community/prometheus-operator-crds
-        release_namespace: default
-        state: present
-        kubeconfig: /etc/kubernetes/admin.conf 
-        skip_crds: yes
-        update_repo_cache: true
- 
-#    - name: Deploy our application chart
-#      kubernetes.core.helm:
-#        name: test-release-appS
-#        chart_ref: /vagrant/charts/sentiment-chart
-#        release_namespace: monitoring
-#        wait: true
-#        kube_context: /etc/kubernetes/admin.conf 
-#        values_filess: 
-#          - /vagrant/values.yaml
-#
+        name: prometheus-stack
+        chart_ref: prometheus-community/kube-prometheus-stack
+        release_namespace: monitoring
+        create_namespace: true 
+        kubeconfig: "{{ kubeconfig_src }}"
+        state: present 
+        wait: true 
+        wait_timeout: "5m" 
+        atomic: true # might be needed for rollback
+        values: 
+          fullnameOverride: "kube-prometheus"
+
+          # Grafana Configuration
+          grafana:
+            enabled: true
+            sidecar:
+              dashboards:
+                enabled: true
+                label: "grafana_dashboard"
+                labelValue: "1"
+            service:
+              type: LoadBalancer
+              port: 80
+              targetPort: 3000
+            ingress:
+              enabled: false
+
+          # Prometheus Configuration
+          prometheus:
+            enabled: true
+            prometheusSpec:
+              serviceMonitorNamespaceSelector: {}
+              serviceMonitorSelector: {}
+            service:
+              type: LoadBalancer
+              portName: http 
+              port: 80
+              targetPort: 9090
+            ingress:
+              enabled: false
+
+          alertmanager:
+            enabled: false
 
 
-  handlers:
-  - name: Restart containerd
-    service: 
-      name: containerd
-      state: restarted
-      enabled: yes

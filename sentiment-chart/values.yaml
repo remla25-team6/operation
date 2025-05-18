@@ -19,3 +19,10 @@ secret:
 
 sharedVolume:
   path: /mnt/shared
+
+
+grafana:
+  dashboard:
+    enabled: true
+    # namespace: monitoring
+    jsonFileName: app-custom-dashboard.json 
