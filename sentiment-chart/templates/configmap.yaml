@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  model.host: http://{{ .Release.Name }}-{{ .Values.model.host }}

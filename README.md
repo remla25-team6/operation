@@ -3,32 +3,75 @@
 ## Starting the application
 From the root directory:
 
-With docker:
-- `echo your_personal_access_token | docker login ghcr.io -u your_github_username --password-stdin` - to login
-- `docker compose up` - to start the application
-- Access at: http://127.0.0.1:8080/
-- `docker compose down` - to stop the application
+### With Docker:
+```bash
+echo your_personal_access_token | docker login ghcr.io -u your_github_username --password-stdin     # Login
+docker compose up          # Start the application
+docker compose down        # Stop the application
+```
 
-With Kubernetes:
-- `vagrant up` - to start vagrant and provision
-- `ansible-galaxy collection install -r requirements.yml` - to install the required ansible collections
-- `ansible-playbook -u vagrant -i 192.168.56.100, finalization.yml` - to run final provisioning steps
-- `export $(cat .env | xargs)` - to set env variables (app/model images and model service URL)
-- `ansible-playbook -u vagrant -i 192.168.56.100, deployment.yml -e "MODEL_IMAGE=$MODEL_IMAGE APP_IMAGE=$APP_IMAGE MODEL_URL=$MODEL_URL"` - to apply the Kubernetes config
-- Access at: http://192.168.56.90:80/. Under some conditions the app may not be reachable at this IP, in that case:
-- `vagrant ssh ctrl` - to ssh into the control node
-- `kubectl get svc -n ingress-nginx` - and find the external IP you can access the app from
-- `vagrant halt` - to stop the application
+Access the app at: [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
 
-To open Kubernetes Dashboard without tunnel or port-forwarding:
+### With Kubernetes
+
+#### 1. Provision the cluster (required for both manual and Helm deployments)
+```bash
+vagrant up  # Start vagrant and provision
+ansible-galaxy collection install -r requirements.yml # Install required Ansible collections
+ansible-playbook -u vagrant --private-key=.vagrant/machines/ctrl/virtualbox/private_key -i 192.168.56.100, finalization.yml  # Run final provisioning steps
+```
+
+#### 1b. To open the Kubernetes Dashboard without tunnel or port-forwarding:
 - Add `192.168.56.91 dashboard.local` to your /etc/hosts file (Linux, macOS) or to
 C:\Windows\System32\drivers\etc\hosts (Windows). Changing the entries can require a flush of the DNS cache:
     - sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder (macOS)
     - sudo systemd-resolve --flush-caches (Linux/systemd)
     - ipconfig /flushdns (Windows)
-- A token can be manually created on the control machine using `kubectl -n kubernetes-dashboard create token admin-user`
-- Visit https://dashboard.local/ and login using the token created in the previous step 
+- A token can be manually created on the control machine using: `kubectl -n kubernetes-dashboard create token admin-user`
+- Visit https://dashboard.local/ (https is important) and login using the token created in the previous step 
 
+#### 2. Choose one of the following deployment methods:
+
+#### A. Manual deployment with Ansible and raw Kubernetes manifests
+
+```bash
+export $(cat .env | xargs)  # Setup environment variables (app/model images and model service URL)
+ansible-playbook -u vagrant -i 192.168.56.100, deployment.yml -e "MODEL_IMAGE=$MODEL_IMAGE APP_IMAGE=$APP_IMAGE MODEL_URL=$MODEL_URL"  # Apply Kubernetes config
+```
+
+#### B. Deployment using Helm
+
+**Option 1: With Vagrant**
+
+```bash
+vagrant ssh ctrl  # SSH into control node
+cd /vagrant/sentiment-chart  # Navigate to synced Helm chart repository
+helm install <release-name> .   # Install the application using the Helm chart with desired release name (Helm chart can be installed more than once into the same cluster with different names)
+```
+
+**Option 2: With Minikube**
+
+```bash
+minikube start  # Start minikube
+cd sentiment-chart  # Navigate to Helm chart repository
+helm install <release-name> .  # Install the application using the Helm chart with desired release name (Helm chart can be installed more than once into the same cluster with different names)
+```
+
+## Access the Application
+After starting the application:
+* Access at: [http://192.168.56.90:80/](http://192.168.56.90:80/)
+* Under some conditions the app may not be reachable at this IP. If the app is not reachable:
+
+  ```bash
+  vagrant ssh ctrl  # SSH into control node
+  kubectl get svc -n ingress-nginx  # Check external IP that you can access the app from
+  ```
+* To stop the application:
+
+  ```bash
+  vagrant halt
+  ```
+  
 ## Repositories
 Below we list the repositories in our system, along with pointers to relevant files within each repository.
 
