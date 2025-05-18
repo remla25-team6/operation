@@ -109,6 +109,16 @@
       register: helm_install_dash
       changed_when: "'STATUS: deployed' in helm_install_dash.stdout or 'STATUS: upgraded' in helm_install_dash.stdout"
     
+
+    - name: Wait for ingress-nginx admission controller
+      shell: |
+        kubectl -n ingress-nginx wait \
+          --for=condition=Ready pod \
+          -l app.kubernetes.io/name=ingress-nginx \
+          --timeout=180s
+      args:
+        executable: /bin/bash
+
     - name: Create ServiceAccount for dashboard login
       shell: |
         cat <<EOF | kubectl apply -f -
