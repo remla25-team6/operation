@@ -1,33 +1,35 @@
 # CS4295 - Team 6 Project
 
-## Documentation overview
+## Documentation Overview
 
 * [Starting the application](#starting-the-application)
 
   * [With Docker](#with-docker)
+    
   * [With Kubernetes](#with-kubernetes)
-
     * [1. Provision the cluster (required for both manual and Helm deployments)](#1-provision-the-cluster-required-for-both-manual-and-helm-deployments)
-    * [2. Choose one of the following deployment methods](#2-choose-one-of-the-following-deployment-methods)
-
-      * [A. Manual deployment with Ansible and raw Kubernetes manifests](#a-manual-deployment-with-ansible-and-raw-kubernetes-manifests)
+      * [1a. Open the Kubernetes Dashboard](#1a-open-the-kubernetes-dashboard-without-a-tunnel)
+      
+    * [2. Choose a deployment method](#2-choose-one-of-the-following-deployment-methods)
+      * [A. Manual deployment (Ansible + manifests)](#a-manual-deployment-with-ansible-and-raw-kubernetes-manifests)
       * [B. Deployment using Helm](#b-deployment-using-helm)
-
-        * [Option 1: With Vagrant](#option-1-with-vagrant)
-        * [Option 2: With Minikube](#option-2-with-minikube)
+        
 * [Access the Application](#access-the-application)
+  
 * [Repositories overview](#repositories)
+
+---
 
 ## Starting the application
 
-From the root directory:
+From the project root:
 
 ### With Docker
 
 ```bash
-echo your_personal_access_token | docker login ghcr.io -u your_github_username --password-stdin     # Login
-docker compose up          # Start the application
-docker compose down        # Stop the application
+echo your_personal_access_token | docker login ghcr.io -u your_github_username --password-stdin  # Login
+docker compose up    # Start the application
+docker compose down  # Stop the application
 ```
 
 Access the app at: [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
@@ -38,53 +40,69 @@ Access the app at: [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
 
 ```bash
 vagrant up  # Start vagrant and provision
+ansible-galaxy collection install -r requirements.yml  # Install required Ansible collections
 ansible-playbook -u vagrant --private-key=.vagrant/machines/ctrl/virtualbox/private_key -i 192.168.56.100, finalization.yml  # Run final provisioning steps
 ```
 
-#### 2. Choose one of the following deployment methods:
+##### 1a. Open the Kubernetes Dashboard without a tunnel.
+
+1. Add `192.168.56.91 dashboard.local` to your **/etc/hosts** (Linux/macOS) or
+   `C:\Windows\System32\drivers\etc\hosts` (Windows). You may need to flush the DNS cache:
+
+   * **macOS**: `sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder`
+   * **Linux (systemd)**: `sudo systemd-resolve --flush-caches`
+   * **Windows**: `ipconfig /flushdns`
+2. Create a token on the control machine:
+
+   ```bash
+   kubectl -n kubernetes-dashboard create token admin-user
+   ```
+3. Visit **[https://dashboard.local/](https://dashboard.local/)** (note **https**) and log in with the generated token.
+
+#### 2. Choose one of the following deployment methods
 
 ##### A. Manual deployment with Ansible and raw Kubernetes manifests
 
 ```bash
-export $(cat .env | xargs)  # Setup environment variables (app/model images and model service URL)
-ansible-playbook -u vagrant -i 192.168.56.100, deployment.yml -e "MODEL_IMAGE=$MODEL_IMAGE APP_IMAGE=$APP_IMAGE MODEL_URL=$MODEL_URL"  # Apply Kubernetes config
+export $(cat .env | xargs)  # Load environment variables (images, model URL)
+ansible-playbook -u vagrant -i 192.168.56.100, deployment.yml \
+  -e "MODEL_IMAGE=$MODEL_IMAGE APP_IMAGE=$APP_IMAGE MODEL_URL=$MODEL_URL"  # Apply manifests
 ```
 
 ##### B. Deployment using Helm
 
-###### Option 1: With Vagrant
+###### Option 1: With Vagrant
 
 ```bash
-vagrant ssh ctrl  # SSH into control node
-cd /vagrant/sentiment-chart  # Navigate to synced Helm chart repository
-helm install <release-name> .   # Install the application using the Helm chart with desired release name (Helm chart can be installed more than once into the same cluster with different names)
+vagrant ssh ctrl                        # SSH into control node
+cd /vagrant/sentiment-chart            # Synced Helm chart repo
+helm install <release-name> .          # Install (can repeat with different names)
 ```
 
-###### Option 2: With Minikube
+###### Option 2: With Minikube
 
 ```bash
-minikube start  # Start minikube
-cd sentiment-chart  # Navigate to Helm chart repository
-helm install <release-name> .  # Install the application using the Helm chart with desired release name (Helm chart can be installed more than once into the same cluster with different names)
+minikube start                         # Start minikube cluster
+cd sentiment-chart                     # Helm chart repo
+helm install <release-name> .          # Install (can repeat with different names)
 ```
 
 ## Access the Application
 
-After starting the application:
+After the application is running:
 
 * Access at: [http://192.168.56.90:80/](http://192.168.56.90:80/)
-* Under some conditions the app may not be reachable at this IP. If the app is not reachable:
+* If the app is unreachable at that IP:
 
   ```bash
-  vagrant ssh ctrl  # SSH into control node
-  kubectl get svc -n ingress-nginx  # Check external IP that you can access the app from
+  vagrant ssh ctrl                  # SSH into control node
+  kubectl get svc -n ingress-nginx  # Find external IP
   ```
-* To stop the application:
+* To stop everything:
 
   ```bash
   vagrant halt
   ```
-
   
 ## Repositories
 Below we list the repositories in our system, along with pointers to relevant files within each repository.
