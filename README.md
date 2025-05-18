@@ -19,6 +19,16 @@ With Kubernetes:
 - `vagrant ssh ctrl` - to ssh into the control node
 - `kubectl get svc -n ingress-nginx` - and find the external IP you can access the app from
 - `vagrant halt` - to stop the application
+
+To open Kubernetes Dashboard without tunnel or port-forwarding:
+- Add `192.168.56.91 dashboard.local` to your /etc/hosts file (Linux, macOS) or to
+C:\Windows\System32\drivers\etc\hosts (Windows). Changing the entries can require a flush of the DNS cache:
+    - sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder (macOS)
+    - sudo systemd-resolve --flush-caches (Linux/systemd)
+    - ipconfig /flushdns (Windows)
+- A token can be manually created on the control machine using `kubectl -n kubernetes-dashboard create token admin-user`
+- Visit https://dashboard.local/ and login using the token created in the previous step 
+
 ## Repositories
 Below we list the repositories in our system, along with pointers to relevant files within each repository.
 
