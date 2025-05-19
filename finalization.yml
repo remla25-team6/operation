@@ -215,3 +215,53 @@
       args:
         chdir: /home/vagrant/istio-1.25.2
       when: (istio_unpacked is changed or (istio_namespace.rc != 0))
+
+
+    - name: Add Prometheus community Helm repository
+      kubernetes.core.helm_repository: 
+        name: prometheus-community
+        repo_url: https://prometheus-community.github.io/helm-charts
+        state: present
+
+    - name: Deploy kube-prometheus-stack
+      kubernetes.core.helm:
+        atomic: true
+        name: prometheus-stack # DO NOT CHANGE THIS
+        chart_ref: prometheus-community/kube-prometheus-stack
+        release_namespace: monitoring
+        create_namespace: true 
+        kubeconfig: "/etc/kubernetes/admin.conf"
+        state: present 
+        update_repo_cache: true
+        values: 
+          fullnameOverride: "kube-prometheus"
+
+
+          # Grafana Configuration
+          grafana:
+            enabled: true
+            adminUser: admin           
+            adminPassword: admin     
+            sidecar:
+              dashboards:
+                enabled: true
+                label: "grafana_dashboard"
+                labelValue: "1"
+            service:
+              type: LoadBalancer
+              port: 80
+
+          # Prometheus Configuration
+          prometheus:
+            enabled: true
+            prometheusSpec:
+              serviceMonitorNamespaceSelector: {}
+              serviceMonitorSelector: {}
+            service:
+              type: LoadBalancer
+              port: 80
+
+          alertmanager:
+            enabled: false
+
+
