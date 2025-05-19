@@ -56,8 +56,8 @@
 - Approved PR: https://github.com/remla25-team6/operation/pull/24
 
 ### Alex:
-- Created PR:
-- Approved PR:
+- Created PR: https://github.com/remla25-team6/operation/pull/25
+- Approved PR (checked, needs fixes): https://github.com/remla25-team6/operation/pull/26 
 
 ### Inaesh: 
 - Created PR: https://github.com/remla25-team6/operation/pull/24
