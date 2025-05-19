@@ -61,6 +61,28 @@ After starting the application:
   ```bash
   vagrant halt
   ```
+## Import Grafana Dashboard
+In order to import the dashboard in grafana and view the metrics open Grafana at 
+
+- 192.168.56.100:port
+
+Where port can be found by running 
+
+```
+kubectl get svc -n monitoring
+```
+and using the port associated with `prometheus-stack-grafana`
+
+Next, login using default credentials:
+
+- user: admin
+- pass: admin
+
+Go to Dashboards, New, Import.
+
+Upload the grafana_dashboard.json file in the UI.
+
+The Dashboard should now be accessible from the Dashboards tab.
 
 ## Repositories
 Below we list the repositories in our system, along with pointers to relevant files within each repository.
