@@ -35,7 +35,7 @@
               --pod-network-cidr={{ pod_cidr }}
           args:
             creates: "{{ kubeconfig_src }}" 
-            
+
         - name: Untaint control-plane so MetalLB (and others) can schedule
           shell: kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule- || true
           environment:
@@ -155,10 +155,10 @@
         repo_url: https://prometheus-community.github.io/helm-charts
         state: present
 
-    - name: Deploy kube-prometheus-stack with dynamic LoadBalancer IPs and increased timeout
+    - name: Deploy kube-prometheus-stack
       kubernetes.core.helm:
         atomic: true
-        name: prometheus-stack
+        name: prometheus-stack # DO NOT CHANGE THIS
         chart_ref: prometheus-community/kube-prometheus-stack
         release_namespace: monitoring
         create_namespace: true 
@@ -177,6 +177,8 @@
           # Grafana Configuration
           grafana:
             enabled: true
+            adminUser: admin           
+            adminPassword: admin     
             tolerations: # Black magic necessary to make it all work
             - key: "node-role.kubernetes.io/control-plane"
               operator: "Exists" 
@@ -188,10 +190,12 @@
                 labelValue: "1"
             service:
               type: NodePort
-              port: 3000
-              targetPort: 3000
             ingress:
               enabled: false
+              #ingressClassName: nginx
+              #paths:
+              #  - /grafana
+              #pathType: Prefix
 
           # Prometheus Configuration
           prometheus:
@@ -205,10 +209,12 @@
                   effect: "NoSchedule"
             service:
               type: NodePort
-              port: 9090
-              targetPort: 9090
             ingress:
               enabled: false
+              #ingressClassName: nginx
+              #paths:
+              #  - /prometheus
+              #pathType: Prefix
 
           prometheusOperator:
             tolerations: # Black magic necessary to make it all work

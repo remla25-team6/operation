@@ -8,6 +8,7 @@ spec:
   selector:
     app: {{ .Release.Name }}-app
   ports:
-    - protocol: TCP
+    - name: metrics
+      protocol: TCP
       port: 80
       targetPort: 8080

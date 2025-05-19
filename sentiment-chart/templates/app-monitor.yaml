@@ -4,7 +4,8 @@ kind: ServiceMonitor
 metadata:
   name: {{ .Release.Name }}-app
   labels:
-    release: {{ .Release.Name }}
+    release: prometheus-stack # DO NOT CHANGE THIS
+    namespace: monitoring # This maybe breaks it idk at this point
 spec:
   selector:
     matchLabels:
