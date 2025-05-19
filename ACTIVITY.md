@@ -64,8 +64,9 @@
 - Approved PR: https://github.com/remla25-team6/operation/pull/17
 
 ### Maarten
-- Created PR:
-- Approved PR:
+- Created PR: https://github.com/remla25-team6/app/pull/5
+- Created PR: https://github.com/remla25-team6/operation/pull/26
+- Approved PR: https://github.com/remla25-team6/operation/pull/25
 
 ### Martijn
 - Created PR:

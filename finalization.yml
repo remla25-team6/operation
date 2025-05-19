@@ -2,75 +2,78 @@
 ---
 # Ansible playbook for finalizing steps
 - name: Finalize Kubernetes cluster setup from finalization workbook
-  hosts: all
+  hosts: 192.168.56.100
   become: true
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
-    
+  collections:
+    - kubernetes.core
+
   vars:
-    metallb_url: "https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml"  # according to assignment
+    metallb_url: "https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml" # according to assignment
     metallb_crd: "/tmp/metallb-native.yaml"
-    ip_pool_range: "192.168.56.90-192.168.56.99"  # According to assignment
-    
+    ip_pool_range: "192.168.56.90-192.168.56.99" # According to assignment
+    ingress_ip: 192.168.56.91
+    istio_ip: 192.168.56.92
+
   tasks:
+    # Install kubernetes (python) module
+    - name: Ensure python-kubernetes is installed
+      ansible.builtin.apt:
+        name: python3-kubernetes
+        state: latest
+        update_cache: true
+
     # A2: Step 20
     - name: Download MetalLB CRDs
       get_url:
         url: "{{ metallb_url }}"
         dest: "{{ metallb_crd }}"
-        mode: '0644'
+        mode: "0644"
 
     - name: Apply MetalLB CRDs
-      shell: "kubectl apply -f {{ metallb_crd }}"
-      register: crd_apply
-      changed_when: "'created' in crd_apply.stdout or 'configured' in crd_apply.stdout"
+      kubernetes.core.k8s:
+        state: present
+        src: "{{ metallb_crd }}"
 
     - name: Wait for MetalLB controller
       shell: |
         kubectl wait -n metallb-system \
           -l app=metallb,component=controller \
-          --for=condition=ready pod --timeout=180s
+          --for=condition=ready pod --timeout=240s
       register: metallb_ready
 
     - name: Create MetalLB IPAddressPool
-      shell: |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: metallb.io/v1beta1
-        kind: IPAddressPool
-        metadata:
-          name: default-pool
-          namespace: metallb-system
-        spec:
-          addresses:
-          - "{{ ip_pool_range }}"
-        EOF
-      register: ippool_apply
-      changed_when: "'created' in ippool_apply.stdout or 'configured' in ippool_apply.stdout"
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: metallb.io/v1beta1
+          kind: IPAddressPool
+          metadata:
+            name: default-pool
+            namespace: metallb-system
+          spec:
+            addresses:
+              - "{{ ip_pool_range }}"
 
     - name: Create MetalLB L2Advertisement
-      shell: |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: metallb.io/v1beta1
-        kind: L2Advertisement
-        metadata:
-          name: l2-adv
-          namespace: metallb-system
-        spec:
-          ipAddressPools:
-          - default-pool
-        EOF
-      args:
-        executable: /bin/bash
-      register: l2adv_apply
-      changed_when: "'created' in l2adv_apply.stdout or 'configured' in l2adv_apply.stdout"
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: metallb.io/v1beta1
+          kind: L2Advertisement
+          metadata:
+            name: l2-adv
+            namespace: metallb-system
+          spec:
+            ipAddressPools:
+              - default-pool
 
     # A2: Step 21
     - name: Add ingress-nginx Helm repository
-      shell: helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-      args:
-        executable: /bin/bash
-      register: helmrepo_ingress
-      changed_when: "'ingress-nginx' in helmrepo_ingress.stdout"
+      kubernetes.core.helm_repository:
+        name: ingress-nginx
+        repo_url: https://kubernetes.github.io/ingress-nginx
 
     - name: Update Helm repositories
       shell: helm repo update
@@ -78,93 +81,127 @@
         executable: /bin/bash
       changed_when: false
 
-    - name: Install Nginx Ingress Controller via Helm
-      shell: |
-        helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
-          --namespace ingress-nginx --create-namespace \
-          {% if ingress_ip is defined %}--set controller.service.loadBalancerIP={{ ingress_ip }}{% endif %}
+    - name: Generate self-signed certificate
+      command: >
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048
+        -keyout /tmp/tls.key -out /tmp/tls.crt
+        -subj "/CN=ingress.local"
       args:
-        executable: /bin/bash
-      register: helm_install_ingress
-      changed_when: "'STATUS: deployed' in helm_install_ingress.stdout or 'STATUS: upgraded' in helm_install_ingress.stdout"
+        creates: /tmp/tls.crt
+
+    - name: Create ingress-nginx namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: ingress-nginx
+
+    - name: Read TLS certificate
+      command: cat /tmp/tls.crt
+      register: tls_cert
+
+    - name: Read TLS key
+      command: cat /tmp/tls.key
+      register: tls_key
+
+    - name: Create TLS secret for Ingress
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: ingress-tls
+            namespace: ingress-nginx
+          type: kubernetes.io/tls
+          data:
+            tls.crt: "{{ tls_cert.stdout | b64encode }}"
+            tls.key: "{{ tls_key.stdout | b64encode }}"
+
+    - name: Update Nginx Ingress Controller with HTTPS configuration
+      kubernetes.core.helm:
+        name: ingress-nginx
+        chart_ref: ingress-nginx/ingress-nginx
+        release_namespace: ingress-nginx
+        create_namespace: true
+        values:
+          controller:
+            service:
+              loadBalancerIP: "{{ ingress_ip }}"
+            extraArgs:
+              default-ssl-certificate: "ingress-nginx/ingress-tls"
 
     # A2: Step 22
     - name: Add kubernetes-dashboard Helm repository
-      shell: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-      register: helmrepo_dash
-      changed_when: "'already exists' not in helmrepo_dash.stdout"
-
-    - name: Update Helm repositories
-      shell: helm repo update
-      args:
-        executable: /bin/bash
-      changed_when: false
+      kubernetes.core.helm_repository:
+        name: kubernetes-dashboard
+        repo_url: https://kubernetes.github.io/dashboard/
 
     - name: Deploy Kubernetes Dashboard via Helm
-      shell: |
-        helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
-          --namespace kubernetes-dashboard --create-namespace
-      args:
-        executable: /bin/bash
-      register: helm_install_dash
-      changed_when: "'STATUS: deployed' in helm_install_dash.stdout or 'STATUS: upgraded' in helm_install_dash.stdout"
-    
+      kubernetes.core.helm:
+        name: kubernetes-dashboard
+        chart_ref: kubernetes-dashboard/kubernetes-dashboard
+        release_namespace: kubernetes-dashboard
+        create_namespace: true
+        values:
+          kong:
+            image:
+              repository: kong
+              tag: "3.9.0"  # See: https://github.com/Kong/kong/issues/13730
+
     - name: Create ServiceAccount for dashboard login
-      shell: |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: ServiceAccount
-        metadata:
-          name: admin-user
-          namespace: kubernetes-dashboard
-        EOF
-      args:
-        executable: /bin/bash
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: admin-user
+            namespace: kubernetes-dashboard
 
     - name: Create ClusterRoleBinding for admin-user
-      shell: |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: rbac.authorization.k8s.io/v1
-        kind: ClusterRoleBinding
-        metadata:
-          name: admin-user-binding
-        roleRef:
-          apiGroup: rbac.authorization.k8s.io
-          kind: ClusterRole
-          name: cluster-admin
-        subjects:
-        - kind: ServiceAccount
-          name: admin-user
-          namespace: kubernetes-dashboard
-        EOF
-      args:
-        executable: /bin/bash
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          metadata:
+            name: admin-user-binding
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: cluster-admin
+          subjects:
+            - kind: ServiceAccount
+              name: admin-user
+              namespace: kubernetes-dashboard
 
     - name: Create Ingress for Kubernetes Dashboard
-      shell: |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: networking.k8s.io/v1
-        kind: Ingress
-        metadata:
-          name: kubernetes-dashboard-ingress
-          namespace: kubernetes-dashboard
-          annotations:
-            nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-        spec:
-          rules:
-          - host: dashboard.local
-            http:
-              paths:
-              - path: /
-                pathType: Prefix
-                backend:
-                  service:
-                    name: kubernetes-dashboard
-                    port:
-                      number: 443
-        EOF
-      args:
-        executable: /bin/bash
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kubernetes-dashboard-ingress
+            namespace: kubernetes-dashboard
+            annotations:
+              nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+          spec:
+            ingressClassName: nginx
+            rules:
+              - host: dashboard.local
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: kubernetes-dashboard-kong-proxy
+                          port:
+                            number: 443
 
     # A2: Step 23
     - name: Check if istioctl binary already exists
@@ -176,7 +213,7 @@
       get_url:
         url: "https://github.com/istio/istio/releases/download/1.25.2/istio-1.25.2-linux-amd64.tar.gz"
         dest: "/tmp/istio-1.25.2-linux-amd64.tar.gz"
-        mode: '0644'
+        mode: "0644"
       register: istio_download
       when: not istioctl_binary.stat.exists
 
@@ -191,17 +228,33 @@
     - name: Add istioctl to PATH for vagrant
       lineinfile:
         dest: /home/vagrant/.bashrc
-        line: 'export PATH=$PATH:/home/vagrant/istio-1.25.2/bin'
+        line: "export PATH=$PATH:/home/vagrant/istio-1.25.2/bin"
       when: istio_unpacked is changed
 
     - name: Check if Istio is already installed in the cluster
-      shell: kubectl get namespace istio-system
+      kubernetes.core.k8s_info:
+        kind: Namespace
+        name: istio-system
       register: istio_namespace
       failed_when: false
-      changed_when: false
 
-    - name: Run istioctl install
-      command: /home/vagrant/istio-1.25.2/bin/istioctl install --set profile=demo -y
+    - name: Create Istio Gateway config file
+      copy:
+        dest: /tmp/istio-operator.yaml
+        content: |
+          apiVersion: install.istio.io/v1alpha1
+          kind: IstioOperator
+          spec:
+            components:
+              ingressGateways:
+              - name: istio-ingressgateway
+                enabled: true
+                k8s:
+                  service:
+                    loadBalancerIP: "{{ istio_ip }}"
+
+    - name: Run istioctl install with custom configuration
+      command: /home/vagrant/istio-1.25.2/bin/istioctl install -f /tmp/istio-operator.yaml -y
       args:
         chdir: /home/vagrant/istio-1.25.2
-      when: (istio_unpacked is changed or (istio_namespace.rc != 0))
+      when: (istio_namespace.resources | length == 0)
