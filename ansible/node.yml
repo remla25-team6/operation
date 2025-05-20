@@ -12,17 +12,10 @@
       shell: kubeadm token create --print-join-command
       register: join_command
       delegate_to: ctrl
-      run_once: true
+      retries: 10
+      delay: 10
 
-    # A2: Step 19
-    # Used Chat GPT 4o to figure out how to make joining idempotent
     - name: Join the Kubernetes cluster
       shell: "{{ join_command.stdout }} --ignore-preflight-errors=all"
       args:
         creates: /etc/kubernetes/kubelet.conf
-  handlers:
-  - name: Restart containerd
-    service: 
-      name: containerd
-      state: restarted
-      enabled: yes

@@ -61,16 +61,6 @@
             mode: '0644'
           ignore_errors: true
 
-        - name: Wait for API server to be initially available after kubeadm init
-          ansible.builtin.wait_for:
-            host: "{{ apiserver_addr }}"
-            port: 6443
-            delay: 10  
-            timeout: 180 
-            state: started 
-          vars:
-            ansible_python_interpreter: /usr/bin/python3 
-
         - name: Download Flannel manifest (if not already present)
           ansible.builtin.get_url:
             url: "{{ flannel_url }}"
@@ -89,25 +79,7 @@
             cmd: "kubectl apply -f {{ flannel_tmp }} --kubeconfig {{ kubeconfig_src }}"
           changed_when: true 
 
-        - name: Wait for Flannel pods to be ready
-          ansible.builtin.command:
-            cmd: "kubectl wait --for=condition=ready pod -l app=flannel -n kube-flannel --timeout=300s --kubeconfig {{ kubeconfig_src }}"
-          register: flannel_status
-          until: flannel_status.rc == 0
-          retries: 6
-          delay: 30
-          changed_when: false 
-
       when: not admin_conf.stat.exists 
-
-    - name: Wait for CoreDNS pods in kube-system to be ready
-      ansible.builtin.command:
-        cmd: "kubectl wait --for=condition=ready pod -l k8s-app=kube-dns -n kube-system --timeout=300s --kubeconfig {{ kubeconfig_src }}"
-      register: coredns_status
-      until: coredns_status.rc == 0
-      retries: 6
-      delay: 20
-      changed_when: false
 
     # --- Helm and Application Stack Deployment ---
     - name: Add Helm signing key
@@ -120,11 +92,6 @@
         repo: deb https://baltocdn.com/helm/stable/debian/ all main
         state: present
         filename: helm-stable
-
-    - name: Update apt cache (runs if cache is older than 1 hour)
-      ansible.builtin.apt:
-        update_cache: yes
-        cache_valid_time: 3600
 
     - name: Install Helm package
       ansible.builtin.apt:
