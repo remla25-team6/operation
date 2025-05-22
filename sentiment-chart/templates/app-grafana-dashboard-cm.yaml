@@ -11,7 +11,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 data:
-  {{ .Values.grafana.dashboard.jsonFileName | default "app-custom-dashboard.json" }}: |-
-    {
-    }
+  {{- $fileName := .Values.grafana.dashboard.jsonFileName | default "app-custom-dashboard.json" }}
+  {{ $fileName }}: |-
+{{ (.Files.Get $fileName) | indent 4 }}
 {{- end }}
