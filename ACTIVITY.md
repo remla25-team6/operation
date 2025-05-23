@@ -75,10 +75,10 @@
 - Created PR: https://github.com/remla25-team6/operation/pull/27 (related to A3)
 - Approval: https://github.com/remla25-team6/app/pull/5/
 
-### Week 4 (May 19+)
+### Week 5 (May 19+)
 
 -- Sten: --
-- Created PR: https://github.com/remla25-team6/model-training/pull/4
+- Created PR: https://github.com/remla25-team6/model-training/pull/4 (related to A4)
 - Approval:
 
 -- Alex: --
@@ -86,7 +86,7 @@
 - Approval: https://github.com/remla25-team6/model-training/pull/4
 
 -- Inaesh: --
-- Created PR: https://github.com/remla25-team6/model-training/pull/5
+- Created PR: https://github.com/remla25-team6/model-training/pull/5 (related to A4)
 - Approval: https://github.com/remla25-team6/operation/pull/26
 
 -- Maarten --
