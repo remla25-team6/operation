@@ -1,72 +1,98 @@
-# A1
+### Week 1 (Apr 21+) -- No work
 
-### Sten:
-- Created PR: https://github.com/remla25-team6/lib-version/pull/1
-- Approved PR: https://github.com/remla25-team6/model-training/pull/1
-- Created PR: https://github.com/remla25-team6/lib-version/pull/2
-- Approved PR: https://github.com/remla25-team6/model-training/pull/2
+### Week 2 (Apr 28+)
 
-### Alex:
-- Created PR: https://github.com/remla25-team6/model-service/pull/1
-- Approved PR: https://github.com/remla25-team6/lib-version/pull/1
-- Created PR: https://github.com/remla25-team6/model-service/pull/3
-- Approved PR: https://github.com/remla25-team6/model-service/pull/6
+-- Sten: --
+- Created PR: https://github.com/remla25-team6/lib-version/pull/1 (related to A1)
+- Approval: https://github.com/remla25-team6/model-training/pull/1
+- Created PR: https://github.com/remla25-team6/lib-version/pull/2 (related to A1)
+- Approval: https://github.com/remla25-team6/model-training/pull/2
 
-### Inaesh: 
-- Created PR: https://github.com/remla25-team6/model-training/pull/1
-- Approved PR: https://github.com/remla25-team6/app/pull/1
-- Created PR: https://github.com/remla25-team6/model-training/pull/2
-- Approved PR: https://github.com/remla25-team6/lib-ml/pull/1
-- Created PR: https://github.com/remla25-team6/model-service/pull/6
+-- Alex: --
+- Created PR: https://github.com/remla25-team6/model-service/pull/1 (related to A1)
+- Approval: https://github.com/remla25-team6/lib-version/pull/1
+- Created PR: https://github.com/remla25-team6/model-service/pull/3 (related to A1)
+- Approval: https://github.com/remla25-team6/model-service/pull/6
 
-### Maarten
-- Created PR: https://github.com/remla25-team6/app/pull/2
-- Approved PR: https://github.com/remla25-team6/model-service/pull/1
+-- Inaesh: --
+- Created PR: https://github.com/remla25-team6/model-training/pull/1 (related to A1)
+- Approval: https://github.com/remla25-team6/app/pull/1
+- Created PR: https://github.com/remla25-team6/model-training/pull/2 (related to A1)
+- Approval: https://github.com/remla25-team6/lib-ml/pull/1
+- Created PR: https://github.com/remla25-team6/model-service/pull/6 (related to A1)
 
-### Martijn
-- Created PR: https://github.com/remla25-team6/lib-ml/pull/1
-- Approved PR: https://github.com/remla25-team6/operation/pull/4
+-- Maarten --
+- Created PR: https://github.com/remla25-team6/app/pull/2 (related to A1)
+- Approval: https://github.com/remla25-team6/model-service/pull/1
 
-# A2
+-- Martijn --
+- Created PR: https://github.com/remla25-team6/lib-ml/pull/1 (related to A1)
+- Approval: https://github.com/remla25-team6/operation/pull/4
 
-### Sten:
-- Created PR: https://github.com/remla25-team6/operation/pull/6
-- Approved PR: https://github.com/remla25-team6/operation/pull/5
+### Week 3 (May 5+)
 
-### Alex:
-- Created PR: https://github.com/remla25-team6/operation/pull/12
-- Approved PR: https://github.com/remla25-team6/operation/pull/11
+-- Sten: --
+- Created PR: https://github.com/remla25-team6/operation/pull/6 (related to A2)
+- Approval: https://github.com/remla25-team6/operation/pull/5
 
-### Inaesh: 
-- Created PR: https://github.com/remla25-team6/operation/pull/11
-- Approved PR: https://github.com/remla25-team6/operation/pull/8
+-- Alex: --
+- Created PR: https://github.com/remla25-team6/operation/pull/12 (related to A2)
+- Approval: https://github.com/remla25-team6/operation/pull/11
 
-### Maarten
-- Created PR: https://github.com/remla25-team6/operation/pull/8
-- Approved PR: https://github.com/remla25-team6/operation/pull/6
+-- Inaesh: --
+- Created PR: https://github.com/remla25-team6/operation/pull/11 (related to A2)
+- Approval: https://github.com/remla25-team6/operation/pull/8
 
-### Martijn
-- Created PR: https://github.com/remla25-team6/operation/pull/5
-- Approved PR: https://github.com/remla25-team6/operation/pull/12
+-- Maarten --
+- Created PR: https://github.com/remla25-team6/operation/pull/8 (related to A2)
+- Approval: https://github.com/remla25-team6/operation/pull/6
 
-# A3
+-- Martijn --
+- Created PR: https://github.com/remla25-team6/operation/pull/5 (related to A2)
+- Approval: https://github.com/remla25-team6/operation/pull/12
 
-### Sten:
-- Created PR: https://github.com/remla25-team6/operation/pull/17
-- Approved PR: https://github.com/remla25-team6/operation/pull/24
+### Week 4 (May 12+)
 
-### Alex:
+-- Sten: --
+- Created PR: https://github.com/remla25-team6/operation/pull/17 (related to A3)
+- Approval: https://github.com/remla25-team6/operation/pull/24
+
+-- Alex: --
+- Created PR: https://github.com/remla25-team6/operation/pull/25 (related to A2)
+- Approval (checked, needs fixes): https://github.com/remla25-team6/operation/pull/26 
+
+-- Inaesh: --
+- Created PR: https://github.com/remla25-team6/operation/pull/24 (related to A3)
+- Approval: https://github.com/remla25-team6/operation/pull/17
+- Approval: https://github.com/remla25-team6/operation/pull/25
+
+-- Maarten --
+- Created PR: https://github.com/remla25-team6/app/pull/5 (related to A3)
+- Created PR: https://github.com/remla25-team6/operation/pull/26 (related to A3)
+- Approval: https://github.com/remla25-team6/operation/pull/25
+
+-- Martijn --
+- Created PR: https://github.com/remla25-team6/operation/pull/27 (related to A3)
+- Approval: https://github.com/remla25-team6/app/pull/5/
+
+### Week 5 (May 19+)
+
+-- Sten: --
+- Created PR: https://github.com/remla25-team6/model-training/pull/4 (related to A4)
+- Approval:
+
+-- Alex: --
 - Created PR:
-- Approved PR:
+- Approval: https://github.com/remla25-team6/model-training/pull/4
 
-### Inaesh: 
-- Created PR: https://github.com/remla25-team6/operation/pull/24
-- Approved PR: https://github.com/remla25-team6/operation/pull/17
+-- Inaesh: --
+- Created PR: https://github.com/remla25-team6/model-training/pull/5 (related to A4)
+- Approval: https://github.com/remla25-team6/operation/pull/26
 
-### Maarten
+-- Maarten --
 - Created PR:
-- Approved PR:
+- Approval:
 
-### Martijn
+-- Martijn --
 - Created PR:
-- Approved PR:
+- Approval:
