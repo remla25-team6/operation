@@ -133,6 +133,16 @@
             extraArgs:
               default-ssl-certificate: "ingress-nginx/ingress-tls"
 
+    - name: Wait for NGINX Ingress controller pods to be ready
+      shell: |
+        kubectl wait --namespace ingress-nginx \
+          --for=condition=ready pod \
+          --selector=app.kubernetes.io/component=controller \
+          --timeout=300s
+      args:
+        executable: /bin/bash
+      changed_when: false 
+    
     # A2: Step 22
     - name: Add kubernetes-dashboard Helm repository
       kubernetes.core.helm_repository:
