@@ -71,22 +71,23 @@
     repo: deb https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /
     state: present
 
-- name: Update apt cache
+- name: Update apt cache (once per play)
   ansible.builtin.apt:
     update_cache: yes
+    cache_valid_time: 3600   # skip update if cache is <1h old
 
 # A2: Step 10
-- name: Install K8s tools
+- name: Install (k8 tools) containerd, runc, kubeadm, kubelet, kubectl
   ansible.builtin.apt:
-    name: "{{ item }}"
+    name:
+      - containerd
+      - runc
+      - kubeadm
+      - kubelet
+      - kubectl
     state: present
-    update_cache: yes
-  loop:
-    - "containerd"
-    - "runc"
-    - "kubeadm"
-    - "kubelet"
-    - "kubectl"
+    install_recommends: no
+
 
 # A2: Step 11
 - name: Create /etc/containerd directory
@@ -120,12 +121,11 @@
     regexp: '^\s*SystemdCgroup\s*='
     line: '            SystemdCgroup = true'
 
-- name: Restart and enable containerd
-  service:
+- name: Restart containerd
+  service: 
     name: containerd
     state: restarted
     enabled: yes
-
 # A2: Step 12
 - name: Register kubelet for auto-start
   service:

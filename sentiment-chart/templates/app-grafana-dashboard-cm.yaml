@@ -1,0 +1,17 @@
+{{- if .Values.grafana.dashboard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-app-dashboard
+  # Deploy in the same namespace as Grafana for easier discovery by default, or ensure Grafana searches this namespace.
+  # If kube-prometheus-stack is in 'monitoring', and Grafana is configured to search its own namespace for dashboards:
+  namespace: monitoring # Or {{ .Release.Namespace }} if Grafana searches there
+  labels:
+    grafana_dashboard: "1" # Must match the label configured in kube-prometheus-stack values
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  {{ .Values.grafana.dashboard.jsonFileName | default "app-custom-dashboard.json" }}: |-
+    {
+    }
+{{- end }}
