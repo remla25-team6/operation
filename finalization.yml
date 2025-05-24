@@ -302,7 +302,8 @@
                 labelValue: "1"
             service:
               type: LoadBalancer
-              port: 80
+              loadBalancerIP: "192.168.56.93"
+              port: 443
 
           # Prometheus Configuration
           prometheus:
@@ -312,8 +313,8 @@
               serviceMonitorSelector: {}
             service:
               type: LoadBalancer
-              port: 80
+              loadBalancerIP: "192.168.56.94"
+              port: 443
 
           alertmanager:
             enabled: false
-      when: (istio_namespace.resources | length == 0)

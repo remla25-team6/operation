@@ -45,7 +45,7 @@ log_message "Using Ansible config: $ANSIBLE_CONFIG"
 # Add entries to /etc/hosts/
 log_message "Updating /etc/hosts entries..."
 add_host_entry "192.168.56.91" "dashboard.local"
-add_host_entry "192.168.56.92" "prometheus.local"
+add_host_entry "192.168.56.94" "prometheus.local"
 add_host_entry "192.168.56.93" "grafana.local"
 
 log_message "Starting and provisioning Vagrant VMs in parallel: ${ALL_VM_NAMES}"
