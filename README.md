@@ -58,7 +58,7 @@ ansible-playbook -u vagrant --private-key=.vagrant/machines/ctrl/virtualbox/priv
 
 #### 2. Choose one of the following deployment methods:
 
-#### A. Automatic deployment with a start script (fastest) ####
+#### A. Automatic deployment with Ansible and Helm ####
 This approach is the fastest but it requires GNU parallel:
 ```bash
 sudo apt-get install parallel
