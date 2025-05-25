@@ -19,73 +19,69 @@
   tasks:
     - import_tasks: general.yml
 
-    # A2: Step 13
     - name: Check for /etc/kubernetes/admin.conf
-      stat: 
-        path: /etc/kubernetes/admin.conf
+      stat:
+        path: "{{ kubeconfig_src }}"
       register: admin_conf
 
-    - name: Initialize kubernetes iff admin.conf is absent
-      shell: |
-        kubeadm init \
-          --apiserver-advertise-address={{ apiserver_addr }} \
-          --node-name={{ ctrl_name }} \
-          --pod-network-cidr={{ pod_cidr }}
-      args:
-        creates: /etc/kubernetes/admin.conf
-      when: not admin_conf.stat.exists
-    
-    # A2: Step 14
-    - name: Create .kube directory
-      file:
-        path: "{{ kubeconfig_user_path | dirname }}"
-        state: directory
-        owner: vagrant
-        group: vagrant
-        mode: '0755'
-    
-    - name: Copy admin.conf to vagrant user's .kube
-      copy:
-        src: "{{ kubeconfig_src }}"
-        dest: "{{ kubeconfig_user_path }}"
-        remote_src: true
-        owner: vagrant
-        group: vagrant
-        mode: '0644'
+    # --- Block for Kubernetes Initialization (runs only if admin.conf is absent) ---
+    - name: Initialize Kubernetes Control Plane and CNI
+      block:
+        - name: Run kubeadm init
+          ansible.builtin.shell: |
+            kubeadm init \
+              --apiserver-advertise-address={{ apiserver_addr }} \
+              --node-name={{ ctrl_name }} \
+              --pod-network-cidr={{ pod_cidr }}
+          args:
+            creates: "{{ kubeconfig_src }}" 
 
-    - name: Publish admin.conf to host via /vagrant
-      copy:
-        src: "{{ kubeconfig_src }}"
-        dest: /vagrant/admin.conf
-        remote_src: true
-        mode: '0644'
-        
-    # A2: Step 15
-    - name: Check if Flannel manifest is present
-      stat:
-        path: "{{ flannel_url }}"
-      register: flannel_pres
+        - name: Create .kube directory for vagrant user
+          ansible.builtin.file:
+            path: "{{ kubeconfig_user_path | dirname }}"
+            state: directory
+            owner: vagrant
+            group: vagrant
+            mode: '0755'
 
-    - name: Download Flannel manifest
-      get_url:
-        url: "{{ flannel_url }}"
-        dest: "{{ flannel_tmp }}"
-        mode: '0644'
-      when: not flannel_pres.stat.exists
+        - name: Copy admin.conf to vagrant user's .kube
+          ansible.builtin.copy:
+            src: "{{ kubeconfig_src }}"
+            dest: "{{ kubeconfig_user_path }}"
+            remote_src: true
+            owner: vagrant
+            group: vagrant
+            mode: '0644'
 
-    - name: Inject --iface into Flannel DaemonSet args
-      ansible.builtin.replace:
-        path: "{{ flannel_tmp }}"
-        regexp: '^(\s*)- --ip-masq$'
-        replace: '\1- --ip-masq\n\1- --iface={{ flannel_iface }}'
+        - name: Publish admin.conf to host via /vagrant
+          ansible.builtin.copy:
+            src: "{{ kubeconfig_src }}"
+            dest: "/vagrant/admin.conf"
+            remote_src: true
+            mode: '0644'
+          ignore_errors: true
 
+        - name: Download Flannel manifest (if not already present)
+          ansible.builtin.get_url:
+            url: "{{ flannel_url }}"
+            dest: "{{ flannel_tmp }}"
+            mode: '0644'
+            force: no 
 
-    - name: Apply Flannel network manifest
-      shell: >
-        kubectl apply -f {{ flannel_tmp }}
-        --kubeconfig {{ kubeconfig_src }}
+        - name: Inject --iface into Flannel DaemonSet args
+          ansible.builtin.replace:
+            path: "{{ flannel_tmp }}"
+            regexp: '^(\s*)- --ip-masq$'
+            replace: '\1- --ip-masq\n\1- --iface={{ flannel_iface }}'
 
-    # A2: Step 16
+        - name: Apply Flannel network manifest
+          ansible.builtin.command: 
+            cmd: "kubectl apply -f {{ flannel_tmp }} --kubeconfig {{ kubeconfig_src }}"
+          changed_when: true 
+
+      when: not admin_conf.stat.exists 
+
+    # --- Helm and Application Stack Deployment ---
     - name: Add Helm signing key
       ansible.builtin.apt_key:
         url: https://baltocdn.com/helm/signing.asc
@@ -96,23 +92,21 @@
         repo: deb https://baltocdn.com/helm/stable/debian/ all main
         state: present
         filename: helm-stable
-    
-    - name: Update apt cache
-      ansible.builtin.apt:
-        update_cache: yes
 
     - name: Install Helm package
       ansible.builtin.apt:
         name: helm
         state: present
 
-    # A2: Step 17
-    # Used ChatGPT-4o to figure out how to skip re-installing the helm-diff plugin during re-provisioning
     - name: Get list of installed helm plugins
-      command: helm plugin list
+      ansible.builtin.command: helm plugin list
       register: helm_plugins
       changed_when: false
+      environment: 
+        KUBECONFIG: "{{ kubeconfig_user_path }}" 
 
-    - name: Install helm-diff if not installed
-      shell: helm plugin install https://github.com/databus23/helm-diff
-      when: "'diff' not in helm_plugins.stdout"  
+    - name: Install helm-diff plugin if not already installed
+      ansible.builtin.command: helm plugin install https://github.com/databus23/helm-diff
+      when: "'diff' not in helm_plugins.stdout"
+      environment:
+        KUBECONFIG: "{{ kubeconfig_user_path }}"

@@ -1,12 +1,28 @@
 model:
-  image: ghcr.io/remla25-team6/model-service:0.0.3-pre.20250506.194625
+  image: ghcr.io/remla25-team6/model-service:latest
   host: model-service:8080
 
 app:
-  image: ghcr.io/remla25-team6/app:0.0.4-pre.20250506.183739
+  image: ghcr.io/remla25-team6/app:latest
+
+metrics:
+  enabled: true
+  port: 8080
+  path: /actuator/prometheus
+  serviceMonitor:
+    enabled: true
+    interval: 15s
+    scrapeTimeout: 15s
 
 secret:
   foo: PGV4YW1wbGVfc2VjcmV0Pg==
 
 sharedVolume:
   path: /mnt/shared
+
+
+grafana:
+  dashboard:
+    enabled: true
+    # namespace: monitoring
+    jsonFileName: app-custom-dashboard.json 

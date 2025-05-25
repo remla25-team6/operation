@@ -58,14 +58,30 @@ ansible-playbook -u vagrant --private-key=.vagrant/machines/ctrl/virtualbox/priv
 
 #### 2. Choose one of the following deployment methods:
 
-#### A. Manual deployment with Ansible and raw Kubernetes manifests
+#### A. Automatic deployment with Ansible and Helm ####
+This approach is the fastest but it requires GNU parallel:
+```bash
+sudo apt-get install parallel
+```
+The entire application can be then deployed using the provided start script:
+```bash
+chmod +x deploy-app.sh
+./deploy-app.sh
+```
+Note that this automatically adds the following three entries to your ```/etc/hosts``` file, if they are not already present:
+```yaml
+192.168.56.91 dashboard.local
+192.168.56.92 grafana.local
+192.168.56.93 prometheus.local
+```
+#### B. Manual deployment with Ansible and raw Kubernetes manifests
 
 ```bash
 export $(cat .env | xargs)  # Setup environment variables (app/model images and model service URL)
 ansible-playbook -u vagrant -i 192.168.56.100, deployment.yml -e "MODEL_IMAGE=$MODEL_IMAGE APP_IMAGE=$APP_IMAGE MODEL_URL=$MODEL_URL"  # Apply Kubernetes config
 ```
 
-#### B. Deployment using Helm
+#### C. Deployment using Helm
 
 **Option 1: With Vagrant**
 
