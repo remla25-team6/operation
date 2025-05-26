@@ -267,7 +267,11 @@
       command: /home/vagrant/istio-1.25.2/bin/istioctl install -f /tmp/istio-operator.yaml -y
       args:
         chdir: /home/vagrant/istio-1.25.2
-      when: (istio_unpacked is changed or (istio_namespace.rc != 0))
+      when: 
+        - istio_unpacked is defined and istio_unpacked is changed
+          # Run if unpacking happened
+        - istio_namespace.resources | length == 0
+          # Run if the namespace doesn't exist
 
 
     - name: Add Prometheus community Helm repository
@@ -303,7 +307,7 @@
             service:
               type: LoadBalancer
               loadBalancerIP: "192.168.56.93"
-              port: 443
+              port: 80
 
           # Prometheus Configuration
           prometheus:
@@ -314,7 +318,7 @@
             service:
               type: LoadBalancer
               loadBalancerIP: "192.168.56.94"
-              port: 443
+              port: 80
 
           alertmanager:
             enabled: false
