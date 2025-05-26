@@ -71,9 +71,10 @@ chmod +x deploy-app.sh
 Note that this automatically adds the following three entries to your ```/etc/hosts``` file, if they are not already present:
 ```yaml
 192.168.56.91 dashboard.local
-192.168.56.92 grafana.local
-192.168.56.93 prometheus.local
+192.168.56.93 grafana.local
+192.168.56.94 prometheus.local
 ```
+On each run the deployment script will prompt the user for the possibility of a cleanup. In case you are experiencing issues with the deployment script trying this cleanup step is recommended.
 #### B. Manual deployment with Ansible and raw Kubernetes manifests
 
 ```bash
@@ -118,7 +119,7 @@ After starting the application:
 ## Accessing Grafana Dashboard
 In order to import the dashboard in grafana and view the metrics open Grafana at:
 
-- http://grafana.local
+- http://grafana.local (or 192.168.56.93:443)
 
 Next, login using default credentials:
 

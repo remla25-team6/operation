@@ -37,6 +37,64 @@ add_host_entry() {
     fi
 }
 
+cleanup_system() {
+    # Display warning in red and explain why cleanup is necessary
+    echo -e "\033[91m⚠️  To increase stability a cleanup process could be beneficial ⚠️\033[0m"
+    echo -e "\033[91mThis cleanup process will:\033[0m"
+    echo -e "\033[91m• Clear system VM memory caches\033[0m"
+    echo -e "\033[91m• Destroy existing operation VM's (vagrant destroy -f)\033[0m"
+    echo -e "\033[91m• Clean up VirtualBox host-only networks\033[0m"
+    echo ""
+    echo -e "\033[91mWhy this MIGHT increase stability:\033[0m"
+    echo -e "\033[91m• Prevents conflicts with existing VirtualBox instances\033[0m"
+    echo -e "\033[91m• Ensures clean network configuration for new VMs\033[0m"
+    echo -e "\033[91m• Frees up system resources for optimal VM deployment\033[0m"
+    echo ""
+    
+    echo -e "\033[93mDo you want to proceed with the system cleanup? (answering no will continue the deployment) (y/N): \033[0m"
+    read -r response
+    
+    case "${response,,}" in
+        y|yes)
+            echo -e "\033[92mProceeding with system cleanup...\033[0m"
+            ;;
+        *)
+            echo -e "\033[93mSkipping system cleanup.\033[0m"
+            return 0
+            ;;
+    esac
+    
+    log_message "Performing system cleanup before deployment..."
+
+    # Destroy remaining VM's
+    echo "Destroying possible operation VM's (vagrant destroy -f)...."
+    vagrant destroy -f
+
+    # Clear vbox host networks
+    echo "Cleaning VirtualBox host-only networks..."
+    VBoxManage list hostonlyifs | grep -E "^Name:" | sed 's/Name: *//' | while read iface; do
+        VBoxManage hostonlyif remove "$iface" 2>/dev/null || true
+    done
+
+    # Clear caches
+    echo "Clearing system caches..."
+    echo "3" | sudo tee /proc/sys/vm/drop_caches > /dev/null
+    
+
+    # Clean up any existing vbox processes
+    #echo "Stopping VirtualBox processes..."
+    #sudo pkill -f VBoxHeadless || true
+    #
+    ## Remove vbox interface
+    #echo "Removing stale VirtualBox network interfaces..."
+    #for iface in $(VBoxManage list hostonlyifs | grep -B2 "VMs:" | grep -A2 "VMs: *$" | grep "Name:" | cut -d: -f2 | tr -d ' '); do
+    #    VBoxManage hostonlyif remove "$iface" 2>/dev/null || true
+    #done
+
+    echo -e "\033[92mSystem cleanup completed successfully!\033[0m"
+}
+
+cleanup_system
 
 log_message "Starting infrastructure provisioning and deployment script."
 
@@ -55,7 +113,10 @@ if ! command -v parallel &> /dev/null; then
 fi
 
 # Vagrant up for the 3 nodes in parallel
-parallel --jobs 3 --tag --linebuffer --no-notice "vagrant up {} --provision-with ansible" ::: ${ALL_VM_NAMES}
+vagrant up ctrl
+log_message "Provisioned VM ctrl, now provisioning the worker nodes"
+
+parallel --jobs 2 --tag --linebuffer --no-notice "vagrant up {}" ::: ${VM_WORKER_NAMES}
 log_message "Vagrant VMs up and initial Ansible provisioning complete."
 
 ansible-galaxy collection install -r requirements.yml # Install required Ansible collections
@@ -68,8 +129,15 @@ ansible-playbook -u vagrant --private-key=.vagrant/machines/ctrl/virtualbox/priv
 log_message "Finalization playbook complete."
 
 # Installing helm
-log_message "Deploying application using Helm on control node (${VM_CTRL_NAME})..."
-vagrant ssh "${VM_CTRL_NAME}" --command "cd ${HELM_CHART_PATH} && helm upgrade --install ${HELM_RELEASE_NAME} ."
+log_message "Deploying application using Helm..."
+if ! vagrant ssh "${VM_CTRL_NAME}" --command "
+  cd ${HELM_CHART_PATH} && 
+  helm dependency update && 
+  helm upgrade --install ${HELM_RELEASE_NAME} . --wait --timeout=10m
+"; then
+    error_message "Helm deployment failed"
+fi
+
 
 log_message "Helm deployment complete."
 log_message "Infrastructure provisioning and application deployment script finished successfully!"
@@ -77,5 +145,8 @@ log_message "The app can be accessed at: 192.168.56.90:80"
 log_message "Kubernetes dashboard can be accessed at: dashboard.local"
 log_message "Grafana dashboard can be accessed at: grafana.local"
 log_message "Prometheus dashboard can be accessed at prometheus.local"
+
+log_message "Your kubernetes dashboard token is:"
+vagrant ssh -c "kubectl -n kubernetes-dashboard create token admin-user" ctrl
 
 exit 0
