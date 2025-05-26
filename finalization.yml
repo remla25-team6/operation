@@ -147,7 +147,8 @@
     - name: Add kubernetes-dashboard Helm repository
       kubernetes.core.helm_repository:
         name: kubernetes-dashboard
-        repo_url: https://kubernetes.github.io/dashboard/
+        repo_url: https://kubernetes.github.io/dashboard
+        state: present
 
     - name: Deploy Kubernetes Dashboard via Helm
       kubernetes.core.helm:
@@ -273,6 +274,14 @@
         - istio_namespace.resources | length == 0
           # Run if the namespace doesn't exist
 
+    - name: Create monitoring namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: monitoring
 
     - name: Add Prometheus community Helm repository
       kubernetes.core.helm_repository: 
@@ -280,13 +289,40 @@
         repo_url: https://prometheus-community.github.io/helm-charts
         state: present
 
+    - name: Create TLS secret for Prometheus
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: prometheus-tls
+            namespace: monitoring
+          type: kubernetes.io/tls
+          data:
+            tls.crt: "{{ tls_cert.stdout | b64encode }}"
+            tls.key: "{{ tls_key.stdout | b64encode }}"
+    
+    - name: Create TLS secret for Grafana
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: grafana-tls
+            namespace: monitoring
+          type: kubernetes.io/tls
+          data:
+            tls.crt: "{{ tls_cert.stdout | b64encode }}"
+            tls.key: "{{ tls_key.stdout | b64encode }}"
+
     - name: Deploy kube-prometheus-stack
       kubernetes.core.helm:
         atomic: true
         name: prometheus-stack # DO NOT CHANGE THIS
         chart_ref: prometheus-community/kube-prometheus-stack
         release_namespace: monitoring
-        create_namespace: true 
         kubeconfig: "/etc/kubernetes/admin.conf"
         state: present 
         update_repo_cache: true
@@ -299,6 +335,31 @@
             enabled: true
             adminUser: admin           
             adminPassword: admin     
+            extraSecretMounts:
+              - name: grafana-tls
+                secretName: grafana-tls
+                mountPath: /cert
+                readOnly: true
+            livenessProbe:
+              httpGet:
+                path: /api/health
+                port: 3000
+                scheme: HTTPS
+            readinessProbe:
+              httpGet:
+                path: /api/health
+                port: 3000
+                scheme: HTTPS
+            startupProbe:
+              httpGet:
+                path: /api/health
+                port: 3000
+                scheme: HTTPS
+            grafana.ini:
+              server:
+                protocol: https
+                cert_file: /cert/tls.crt
+                cert_key: /cert/tls.key
             sidecar:
               dashboards:
                 enabled: true
@@ -307,18 +368,27 @@
             service:
               type: LoadBalancer
               loadBalancerIP: "192.168.56.93"
-              port: 80
+              port: 443 
 
           # Prometheus Configuration
           prometheus:
             enabled: true
             prometheusSpec:
+              web:
+                tlsConfig:
+                  cert:
+                    secret:
+                      name: prometheus-tls
+                      key: tls.crt
+                  keySecret:
+                    name: prometheus-tls
+                    key: tls.key
               serviceMonitorNamespaceSelector: {}
               serviceMonitorSelector: {}
             service:
               type: LoadBalancer
               loadBalancerIP: "192.168.56.94"
-              port: 80
+              port: 443
 
           alertmanager:
             enabled: false

@@ -74,8 +74,7 @@ Note that this automatically adds the following three entries to your ```/etc/ho
 192.168.56.93 grafana.local
 192.168.56.94 prometheus.local
 ```
-
-Note that port 443/TLS is used for these services.
+On each run the deployment script will prompt the user for the possibility of a cleanup. In case you are experiencing issues with the deployment script trying this cleanup step is recommended.
 #### B. Manual deployment with Ansible and raw Kubernetes manifests
 
 ```bash
