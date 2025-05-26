@@ -79,7 +79,7 @@
 
 -- Sten: --
 - Created PR: https://github.com/remla25-team6/model-training/pull/4 (related to A4)
-- Approval:
+- Approval: https://github.com/remla25-team6/operation/pull/27
 
 -- Alex: --
 - Created PR:
