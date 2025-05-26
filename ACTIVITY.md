@@ -59,7 +59,7 @@
 
 -- Alex: --
 - Created PR: https://github.com/remla25-team6/operation/pull/25 (related to A2)
-- Approval (checked, needs fixes): https://github.com/remla25-team6/operation/pull/26 
+- Approval: https://github.com/remla25-team6/operation/pull/26 (related to A3)
 
 -- Inaesh: --
 - Created PR: https://github.com/remla25-team6/operation/pull/24 (related to A3)
@@ -82,7 +82,7 @@
 - Approval: https://github.com/remla25-team6/operation/pull/27
 
 -- Alex: --
-- Created PR:
+- Created PR: https://github.com/remla25-team6/model-training/pull/6 (related to A4)
 - Approval: https://github.com/remla25-team6/model-training/pull/4
 
 -- Inaesh: --
