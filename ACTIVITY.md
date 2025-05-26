@@ -91,7 +91,7 @@
 - Approval: https://github.com/remla25-team6/model-training/pull/7
 
 -- Maarten --
-- Created PR: https://github.com/remla25-team6/operation/pull/38
+- Created PR: https://github.com/remla25-team6/operation/pull/38 (related to A4)
 - Approval: https://github.com/remla25-team6/model-training/pull/5
 
 -- Martijn --
