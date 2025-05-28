@@ -1,4 +1,3 @@
-{{- if eq .Values.ingress.type "nginx" }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -10,4 +9,3 @@ spec:
       name: {{ .Release.Name }}-app
       port:
         number: 80
-{{- end }}

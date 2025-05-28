@@ -26,7 +26,3 @@ grafana:
     enabled: true
     # namespace: monitoring
     jsonFileName: app-custom-dashboard.json
-
-# flag for using nginx or istio ingress
-ingress:
-  type: istio # "istio" or "nginx"
