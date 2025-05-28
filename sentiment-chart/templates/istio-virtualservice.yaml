@@ -8,10 +8,23 @@ spec:
   hosts:
   - "*"
   http:
-  - match:
-      - uri:
-          prefix: /
-    route:
+    - match:
+        - headers:
+            x-version:
+              exact: v2
+      route:
+        - destination:
+            host: {{ .Release.Name }}-app
+            subset: v2
+    - match:
+        - headers:
+            x-version:
+              exact: v1
+      route:
+        - destination:
+            host: {{ .Release.Name }}-app
+            subset: v1
+    - route:
       - destination:
           host: {{ .Release.Name }}-app
           subset: v1
@@ -19,4 +32,4 @@ spec:
       - destination:
           host: {{ .Release.Name }}-app
           subset: v2
-        weight: 10
+        weight: 10       
