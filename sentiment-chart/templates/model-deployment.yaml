@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-model-service
+  name: {{ .Release.Name }}-model-service-v1
   labels:
     app: {{ .Release.Name }}-model-service
     version: v1
@@ -10,14 +10,49 @@ spec:
   selector:
     matchLabels:
       app: {{ .Release.Name }}-model-service
+      version: v1
   template:
     metadata:
       labels:
         app: {{ .Release.Name }}-model-service
+        version: v1
     spec:
       containers:
         - name: model-service
           image: {{ .Values.model.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /mnt/shared
+              name: my-volume
+      volumes:
+        - name: my-volume
+          hostPath:
+            path: {{ .Values.sharedVolume.path }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-model-service-v2
+  labels:
+    app: {{ .Release.Name }}-model-service
+    version: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-model-service
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-model-service
+        version: v2
+    spec:
+      containers:
+        - name: model-service
+          image: {{ .Values.model.image2 }}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

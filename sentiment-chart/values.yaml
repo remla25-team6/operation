@@ -1,9 +1,11 @@
 model:
   image: ghcr.io/remla25-team6/model-service:latest
+  image2: ghcr.io/remla25-team6/model-service:latest
   host: model-service:8080
 
 app:
   image: ghcr.io/remla25-team6/app:latest
+  image2: ghcr.io/remla25-team6/app:latest
 
 metrics:
   enabled: true

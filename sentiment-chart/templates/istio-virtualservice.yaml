@@ -9,10 +9,14 @@ spec:
   - "*"
   http:
   - match:
-    - uri:
-        prefix: /
+      - uri:
+          prefix: /
     route:
-    - destination:
-        host: {{ .Release.Name }}-app
-        port:
-          number: 80
+      - destination:
+          host: {{ .Release.Name }}-app
+          subset: v1
+        weight: 90
+      - destination:
+          host: {{ .Release.Name }}-app
+          subset: v2
+        weight: 10
