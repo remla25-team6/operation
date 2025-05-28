@@ -4,6 +4,7 @@ metadata:
   name: {{ .Release.Name }}-app
   labels:
     app: {{ .Release.Name }}-app
+    version: v1
 spec:
   replicas: 1
   selector:

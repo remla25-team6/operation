@@ -1,0 +1,20 @@
+{{- if eq .Values.ingress.type "istio" }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-entry-service
+spec:
+  gateways:
+  - {{ .Release.Name }}-gateway
+  hosts:
+  - "*"
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: {{ .Release.Name }}-app
+        port:
+          number: 80
+{{- end }}

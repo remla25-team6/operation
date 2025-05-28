@@ -4,6 +4,7 @@ metadata:
   name: {{ .Release.Name }}-model-service
   labels:
     app: {{ .Release.Name }}-model-service
+    version: v1
 spec:
   replicas: 1
   selector:
