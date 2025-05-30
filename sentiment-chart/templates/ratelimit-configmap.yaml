@@ -1,0 +1,20 @@
+{{- if .Values.rateLimit.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-ratelimit-config
+data:
+  config.yaml: |
+    domain: ratelimit
+    descriptors:
+      # Rate limit per IP address - 10 requests per minute
+      - key: REMOTE_ADDRESS
+        rate_limit:
+          unit: minute
+          requests_per_unit: {{ .Values.rateLimit.userLimit | default 10 }}
+      # Fallback rate limit for requests without IP
+      - key: PATH
+        rate_limit:
+          unit: minute
+          requests_per_unit: {{ .Values.rateLimit.globalLimit | default 100 }}
+  {{- end }}

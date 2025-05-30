@@ -1,9 +1,11 @@
 model:
   image: ghcr.io/remla25-team6/model-service:latest
+  image2: ghcr.io/remla25-team6/model-service:latest
   host: model-service:8080
 
 app:
   image: ghcr.io/remla25-team6/app:latest
+  image2: ghcr.io/remla25-team6/app:latest
 
 metrics:
   enabled: true
@@ -25,4 +27,10 @@ grafana:
   dashboard:
     enabled: true
     # namespace: monitoring
-    jsonFileName: app-custom-dashboard.json 
+    jsonFileName: app-custom-dashboard.json
+
+# Rate limiter (see ratelimit-configmap and envoyfilter)
+rateLimit:
+  enabled: true
+  userLimit: 10  # requests per minute per user
+  globalLimit: 20  # fallback limit if no ip
