@@ -16,6 +16,7 @@ export ANSIBLE_CONFIG="./ansible.cfg"
 
 HELM_RELEASE_NAME="sentiment-release" 
 HELM_CHART_PATH="/vagrant/sentiment-chart"
+MONITORING_ENV_FILE=".monitoring.env"
 
 log_message() {
     echo -e "${GREEN}INFO: $1${NC}"
@@ -36,6 +37,66 @@ add_host_entry() {
         log_message "Host entry already exists in /etc/hosts: ${ip} ${hostname}"
     fi
 }
+
+setup_monitoring_secrets() {
+    if [ ! -f "$MONITORING_ENV_FILE" ]; then
+        warning_message "Monitoring secrets file not found. Creating $MONITORING_ENV_FILE..."
+        echo -e "${YELLOW}Please provide the following information for monitoring setup:${NC}"
+        
+        # Grafana admin password
+        read -p "Enter Grafana username: " GRAFANA_USER
+        while true; do
+            read -sp "Enter Grafana admin password: " GRAFANA_PASSWORD
+            echo
+            read -sp "Confirm Grafana admin password: " GRAFANA_PASSWORD_CONFIRM
+            echo
+            if [ "$GRAFANA_PASSWORD" = "$GRAFANA_PASSWORD_CONFIRM" ]; then
+                break
+            else
+                echo -e "${RED}Passwords do not match. Please try again.${NC}"
+            fi
+        done
+        
+        # SMTP Configuration
+        read -p "Enter SMTP server (e.g., smtp.gmail.com:587): " SMTP_SERVER
+        read -p "Enter SMTP username/email: " SMTP_USERNAME
+        read -sp "Enter SMTP password: " SMTP_PASSWORD
+        echo
+        read -p "Enter alert recipient email: " ALERT_RECIPIENT
+        ALERT_SENDER=$SMTP_USERNAME
+        
+        # Create the .monitoring.env file
+        cat > "$MONITORING_ENV_FILE" << EOF
+# Monitoring configuration - DO NOT COMMIT THIS FILE
+
+# Grafana credentials
+GRAFANA_ADMIN_USER=$GRAFANA_USER
+GRAFANA_ADMIN_PASSWORD=$GRAFANA_PASSWORD
+
+# SMTP Configuration for AlertManager
+SMTP_SERVER=$SMTP_SERVER
+SMTP_USERNAME=$SMTP_USERNAME
+SMTP_PASSWORD=$SMTP_PASSWORD
+ALERT_RECIPIENT=$ALERT_RECIPIENT
+ALERT_SENDER=$ALERT_SENDER
+EOF
+        
+        chmod 600 "$MONITORING_ENV_FILE"
+        log_message "Created $MONITORING_ENV_FILE"
+    else
+        log_message "Found existing $MONITORING_ENV_FILE"
+    fi
+
+    if [ -f "$MONITORING_ENV_FILE" ]; then
+        set -o allexport
+        source "$MONITORING_ENV_FILE"
+        set +o allexport
+        log_message "Exported variables from $MONITORING_ENV_FILE into environment"
+    else
+        warning_message "Unable to find $MONITORING_ENV_FILE to export variables."
+    fi
+}
+
 
 cleanup_system() {
     # Display warning in red and explain why cleanup is necessary
@@ -82,17 +143,19 @@ cleanup_system() {
     
 
     # Clean up any existing vbox processes
-    #echo "Stopping VirtualBox processes..."
-    #sudo pkill -f VBoxHeadless || true
-    #
-    ## Remove vbox interface
-    #echo "Removing stale VirtualBox network interfaces..."
-    #for iface in $(VBoxManage list hostonlyifs | grep -B2 "VMs:" | grep -A2 "VMs: *$" | grep "Name:" | cut -d: -f2 | tr -d ' '); do
-    #    VBoxManage hostonlyif remove "$iface" 2>/dev/null || true
+    echo "Stopping VirtualBox processes..."
+    sudo pkill -f VBoxHeadless || true
+    
+    # Remove vbox interface
+    echo "Removing stale VirtualBox network interfaces..."
+    for iface in $(VBoxManage list hostonlyifs | grep -B2 "VMs:" | grep -A2 "VMs: *$" | grep "Name:" | cut -d: -f2 | tr -d ' '); do
+        VBoxManage hostonlyif remove "$iface" 2>/dev/null || true
     #done
 
     echo -e "\033[92mSystem cleanup completed successfully!\033[0m"
 }
+
+setup_monitoring_secrets
 
 cleanup_system
 

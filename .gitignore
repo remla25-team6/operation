@@ -36,3 +36,4 @@ build/
 .vagrant/
 
 admin.conf
+.monitoring.env
