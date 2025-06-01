@@ -1,5 +1,5 @@
 # Vagrantfile
-WORKER_MEMORY = ENV.fetch("WORKER_MEM", 3000).to_i
+WORKER_MEMORY = ENV.fetch("WORKER_MEM", 4000).to_i
 NUM_WORKERS = ENV.fetch("NUM_WORKERS", 2).to_i
 shared_folder_path = File.expand_path("./shared")
 

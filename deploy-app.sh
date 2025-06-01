@@ -40,7 +40,7 @@ add_host_entry() {
 
 setup_monitoring_secrets() {
     if [ ! -f "$MONITORING_ENV_FILE" ]; then
-        warning_message "Monitoring secrets file not found. Creating $MONITORING_ENV_FILE..."
+        log_message "Monitoring secrets file not found. Creating $MONITORING_ENV_FILE..."
         echo -e "${YELLOW}Please provide the following information for monitoring setup:${NC}"
         
         # Grafana admin password
@@ -141,17 +141,19 @@ cleanup_system() {
     echo "Clearing system caches..."
     echo "3" | sudo tee /proc/sys/vm/drop_caches > /dev/null
     
-
-    # Clean up any existing vbox processes
-    echo "Stopping VirtualBox processes..."
-    sudo pkill -f VBoxHeadless || true
+    # Remove .vagrant directory
+    rm -rf .vagrant/
     
     # Remove vbox interface
     echo "Removing stale VirtualBox network interfaces..."
     for iface in $(VBoxManage list hostonlyifs | grep -B2 "VMs:" | grep -A2 "VMs: *$" | grep "Name:" | cut -d: -f2 | tr -d ' '); do
         VBoxManage hostonlyif remove "$iface" 2>/dev/null || true
-    #done
+    done
 
+    # Clean up any existing vbox processes
+    echo "Stopping VirtualBox processes..."
+    sudo pkill -f VBoxHeadless || true
+    
     echo -e "\033[92mSystem cleanup completed successfully!\033[0m"
 }
 
@@ -169,7 +171,7 @@ add_host_entry "192.168.56.91" "dashboard.local"
 add_host_entry "192.168.56.94" "prometheus.local"
 add_host_entry "192.168.56.93" "grafana.local"
 
-log_message "Starting and provisioning Vagrant VMs in parallel: ${ALL_VM_NAMES}"
+log_message "Starting and provisioning Vagrant VMs in parallel: ${VM_CTRL_NAME}"
 echo "This might take a few minutes."
 if ! command -v parallel &> /dev/null; then
     error_message "GNU parallel is not installed. Please install it to continue."
@@ -179,7 +181,7 @@ fi
 vagrant up ctrl
 log_message "Provisioned VM ctrl, now provisioning the worker nodes"
 
-parallel --jobs 2 --tag --linebuffer --no-notice "vagrant up {}" ::: ${VM_WORKER_NAMES}
+parallel --jobs 1 --tag --linebuffer --no-notice "vagrant up {}" ::: ${VM_WORKER_NAMES}
 log_message "Vagrant VMs up and initial Ansible provisioning complete."
 
 ansible-galaxy collection install -r requirements.yml # Install required Ansible collections

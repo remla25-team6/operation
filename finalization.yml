@@ -284,17 +284,18 @@
             name: monitoring
 
     - name: Create Grafana password Secret
-      kubernets.core.k8s:
+      kubernetes.core.k8s:
         state: present
-        definition: v1
-        kind: Secret
-        metadata:
-          name: grafana-admin-secret
-          namespace: monitoring
-        type: Opaque
-        stringData:
-          admin-user: "{{ lookup('ansible.builtin.env', 'GRAFANA_ADMIN_USER') }}"
-          admin-password: "{{ lookup('ansible.builtin.env', 'GRAFANA_ADMIN_PASSWORD') }}"
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: grafana-admin-secret
+            namespace: monitoring
+          type: Opaque
+          stringData:
+            admin-user: "{{ lookup('ansible.builtin.env', 'GRAFANA_ADMIN_USER') }}"
+            admin-password: "{{ lookup('ansible.builtin.env', 'GRAFANA_ADMIN_PASSWORD') }}"
 
     - name: Create AlertManager SMTP secret
       kubernetes.core.k8s:
@@ -441,12 +442,13 @@
                   from: "{{ lookup('ansible.builtin.env', 'ALERT_SENDER') }}"
                   smarthost: "{{ lookup('ansible.builtin.env', 'SMTP_SERVER') }}"
                   auth_username: "{{ lookup('ansible.builtin.env', 'SMTP_USERNAME') }}"
-                  auth_password_file: '/etc/alertmanager/secrets/smtp-password/password'
+                  auth_password_file: '/etc/alertmanager/secrets/alertmanager-smtp-secret/password'
                   headers:
                     Subject: 'Kubernetes Alert: {{ "{{" }} .GroupLabels.alertname {{ "}}" }}'
+                  require_tls: true
             alertmanagerSpec:
               secrets:
-              - alertmanager-smtp-secret
+                - alertmanager-smtp-secret
             service:
               type: LoadBalancer
               loadBalancerIP: "192.168.56.95"

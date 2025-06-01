@@ -12,41 +12,20 @@ spec:
   - name: app-availability
     interval: 30s
     rules:
-    - alert: AppServiceDown
-      expr: up{job="{{ .Release.Name }}-app"} == 0
+    - alert: AppUnreachable
+      expr: |
+        (
+          absent(up{job="{{ .Release.Name }}-app", namespace="{{ .Release.Namespace }}"}) == 1
+        )
+        or
+        (
+          up{job="{{ .Release.Name }}-app", namespace="{{ .Release.Namespace }}"} == 0
+        )
       for: 2m
       labels:
         severity: critical
         service: "{{ .Release.Name }}-app"
       annotations:
-        summary: "App service {{ $labels.job }} is down"
-        description: "The application service {{ $labels.job }} in namespace {{ $labels.namespace }} has been down for more than 2 minutes."
-    
-    - alert: AppHighErrorRate
-      expr: |
-        (
-          sum(rate(http_server_requests_total{job="{{ .Release.Name }}-app",status=~"5.."}[5m])) by (job, namespace)
-          /
-          sum(rate(http_server_requests_total{job="{{ .Release.Name }}-app"}[5m])) by (job, namespace)
-        ) > 0.05
-      for: 5m
-      labels:
-        severity: warning
-        service: "{{ .Release.Name }}-app"
-      annotations:
-        summary: "High error rate on {{ $labels.job }}"
-        description: "Error rate is above 5% (current value: {{ $value | humanizePercentage }}) for app {{ $labels.job }} in namespace {{ $labels.namespace }}"
-    
-    - alert: AppHighResponseTime
-      expr: |
-        histogram_quantile(0.95,
-          sum(rate(http_server_requests_duration_bucket{job="{{ .Release.Name }}-app"}[5m])) by (job, namespace, le)
-        ) > 1
-      for: 5m
-      labels:
-        severity: warning
-        service: "{{ .Release.Name }}-app"
-      annotations:
-        summary: "High response time on {{ $labels.job }}"
-        description: "95th percentile response time is above 1s (current value: {{ $value | humanizeDuration }}) for app {{ $labels.job }} in namespace {{ $labels.namespace }}"
+        summary: "Application {{ .Release.Name }}-app is unreachable"
+        description: "The application {{ .Release.Name }}-app in namespace {{ .Release.Namespace }} has been unreachable for more than 2 minutes."
 {{- end }}
