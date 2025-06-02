@@ -274,6 +274,35 @@
         - istio_namespace.resources | length == 0
           # Run if the namespace doesn't exist
 
+    - name: Install Istio Addons (prometheus)
+      kubernetes.core.k8s:
+        state: present
+        src: /home/vagrant/istio-1.25.2/samples/addons/prometheus.yaml
+        apply: true
+
+    - name: Install Istio Addons (kiali)
+      kubernetes.core.k8s:
+        state: present
+        src: /home/vagrant/istio-1.25.2/samples/addons/kiali.yaml
+        apply: true
+
+    - name: Install Istio Addons (jaeger)
+      kubernetes.core.k8s:
+        state: present
+        src: /home/vagrant/istio-1.25.2/samples/addons/jaeger.yaml
+        apply: true
+
+    - name: Enable Istio injection for the default namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          kind: Namespace
+          metadata:
+            name: default
+            labels:
+              istio-injection: enabled
+
+              
     - name: Create monitoring namespace
       kubernetes.core.k8s:
         state: present
