@@ -1,6 +1,14 @@
 # general.yml
 ---
 # General tasks for both ctrl and worker nodes
+- name: Configure APT for faster downloads
+  copy:
+    dest: /etc/apt/apt.conf.d/99-parallel-downloads
+    content: |
+      Acquire::http::Pipeline-Depth "5";
+      Acquire::http::No-Cache "true";
+      Acquire::http::Dl-Limit "0";
+
 - name: Disable swap iff it's active
   command: swapoff -a
   when: ansible_swaptotal_mb > 0
@@ -87,6 +95,7 @@
       - kubectl
     state: present
     install_recommends: no
+    force_apt_get: yes
     update_cache: yes
     cache_valid_time: 3600
 
