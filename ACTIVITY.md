@@ -118,5 +118,5 @@
 - Approval: https://github.com/remla25-team6/operation/pull/44
 
 -- Martijn --
-- Created PR:
-- Approval:
+- Created PR: https://github.com/remla25-team6/operation/pull/49 (related to A5)
+- Approval: https://github.com/remla25-team6/operation/pull/43
