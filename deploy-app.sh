@@ -16,9 +16,20 @@ export ANSIBLE_CONFIG="./ansible.cfg"
 
 HELM_RELEASE_NAME="sentiment-release" 
 HELM_CHART_PATH="/vagrant/sentiment-chart"
+MONITORING_ENV_FILE=".monitoring.env"
 
 log_message() {
     echo -e "${GREEN}INFO: $1${NC}"
+}
+
+boot_vms() {
+    log_message "Booting VM's"
+
+    for vm in $ALL_VM_NAMES; do
+        vagrant up $vm --no-provision
+    done 
+
+    log_message "All VM's booted"
 }
 
 error_message() {
@@ -36,6 +47,66 @@ add_host_entry() {
         log_message "Host entry already exists in /etc/hosts: ${ip} ${hostname}"
     fi
 }
+
+setup_monitoring_secrets() {
+    if [ ! -f "$MONITORING_ENV_FILE" ]; then
+        log_message "Monitoring secrets file not found. Creating $MONITORING_ENV_FILE..."
+        echo -e "${YELLOW}Please provide the following information for monitoring setup:${NC}"
+        
+        # Grafana admin password
+        read -p "Enter Grafana username: " GRAFANA_USER
+        while true; do
+            read -sp "Enter Grafana admin password: " GRAFANA_PASSWORD
+            echo
+            read -sp "Confirm Grafana admin password: " GRAFANA_PASSWORD_CONFIRM
+            echo
+            if [ "$GRAFANA_PASSWORD" = "$GRAFANA_PASSWORD_CONFIRM" ]; then
+                break
+            else
+                echo -e "${RED}Passwords do not match. Please try again.${NC}"
+            fi
+        done
+        
+        # SMTP Configuration
+        read -p "Enter SMTP server (e.g., smtp.gmail.com:587): " SMTP_SERVER
+        read -p "Enter SMTP username/email: " SMTP_USERNAME
+        read -sp "Enter SMTP password: " SMTP_PASSWORD
+        echo
+        read -p "Enter alert recipient email: " ALERT_RECIPIENT
+        ALERT_SENDER=$SMTP_USERNAME
+        
+        # Create the .monitoring.env file
+        cat > "$MONITORING_ENV_FILE" << EOF
+# Monitoring configuration - DO NOT COMMIT THIS FILE
+
+# Grafana credentials
+GRAFANA_ADMIN_USER=$GRAFANA_USER
+GRAFANA_ADMIN_PASSWORD=$GRAFANA_PASSWORD
+
+# SMTP Configuration for AlertManager
+SMTP_SERVER=$SMTP_SERVER
+SMTP_USERNAME=$SMTP_USERNAME
+SMTP_PASSWORD=$SMTP_PASSWORD
+ALERT_RECIPIENT=$ALERT_RECIPIENT
+ALERT_SENDER=$ALERT_SENDER
+EOF
+        
+        chmod 600 "$MONITORING_ENV_FILE"
+        log_message "Created $MONITORING_ENV_FILE"
+    else
+        log_message "Found existing $MONITORING_ENV_FILE"
+    fi
+
+    if [ -f "$MONITORING_ENV_FILE" ]; then
+        set -o allexport
+        source "$MONITORING_ENV_FILE"
+        set +o allexport
+        log_message "Exported variables from $MONITORING_ENV_FILE into environment"
+    else
+        warning_message "Unable to find $MONITORING_ENV_FILE to export variables."
+    fi
+}
+
 
 cleanup_system() {
     # Display warning in red and explain why cleanup is necessary
@@ -80,19 +151,23 @@ cleanup_system() {
     echo "Clearing system caches..."
     echo "3" | sudo tee /proc/sys/vm/drop_caches > /dev/null
     
+    # Remove .vagrant directory
+    rm -rf .vagrant/
+    
+    # Remove vbox interface
+    echo "Removing stale VirtualBox network interfaces..."
+    for iface in $(VBoxManage list hostonlyifs | grep -B2 "VMs:" | grep -A2 "VMs: *$" | grep "Name:" | cut -d: -f2 | tr -d ' '); do
+        VBoxManage hostonlyif remove "$iface" 2>/dev/null || true
+    done
 
     # Clean up any existing vbox processes
-    #echo "Stopping VirtualBox processes..."
-    #sudo pkill -f VBoxHeadless || true
-    #
-    ## Remove vbox interface
-    #echo "Removing stale VirtualBox network interfaces..."
-    #for iface in $(VBoxManage list hostonlyifs | grep -B2 "VMs:" | grep -A2 "VMs: *$" | grep "Name:" | cut -d: -f2 | tr -d ' '); do
-    #    VBoxManage hostonlyif remove "$iface" 2>/dev/null || true
-    #done
-
+    echo "Stopping VirtualBox processes..."
+    sudo pkill -f VBoxHeadless || true
+    
     echo -e "\033[92mSystem cleanup completed successfully!\033[0m"
 }
+
+setup_monitoring_secrets
 
 cleanup_system
 
@@ -106,14 +181,17 @@ add_host_entry "192.168.56.91" "dashboard.local"
 add_host_entry "192.168.56.94" "prometheus.local"
 add_host_entry "192.168.56.93" "grafana.local"
 
-log_message "Starting and provisioning Vagrant VMs in parallel: ${ALL_VM_NAMES}"
 echo "This might take a few minutes."
 if ! command -v parallel &> /dev/null; then
     error_message "GNU parallel is not installed. Please install it to continue."
 fi
 
-# Vagrant up for the 3 nodes in parallel
-vagrant up ctrl
+# Boot all VM's first
+boot_vms
+
+log_message "Now provisioning CTRL"
+
+vagrant provision ctrl
 log_message "Provisioned VM ctrl, now provisioning the worker nodes"
 
 parallel --jobs 2 --tag --linebuffer --no-notice "vagrant up {}" ::: ${VM_WORKER_NAMES}
@@ -125,7 +203,11 @@ log_message "Installing required ansible collections"
 # Finalization provision for ctrl vm
 log_message "Running finalization playbook (finalization.yml) on control node (${VM_CTRL_NAME})..."
 #ansible-playbook finalization.yml -i "${INVENTORY_PATH}" --limit "${VM_CTRL_NAME}" # THis uses the inventory generated by Vagrant
-ansible-playbook -u vagrant --private-key=.vagrant/machines/ctrl/virtualbox/private_key -i 192.168.56.100, finalization.yml  
+ansible-playbook \
+  -u vagrant \
+  --private-key="$(vagrant ssh-config ctrl | awk '/IdentityFile/ {print $2}')" \
+  -i 192.168.56.100, \
+  finalization.yml
 log_message "Finalization playbook complete."
 
 # Installing helm
