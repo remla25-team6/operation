@@ -4,15 +4,13 @@ metadata:
   name: {{ .Release.Name }}-ratelimit-config
 data:
   config.yaml: |
+    # per-IP limit
     domain: ratelimit
     descriptors:
-    # per-IP limit
     - key: remote_address
-      descriptors:
-      - key: ""                # match every IP value
-        rate_limit:
-          unit: minute
-          requests_per_unit: {{ .Values.rateLimit.userLimit | default 10 }}
+      rate_limit:
+        unit: minute
+        requests_per_unit: {{ .Values.rateLimit.userLimit | default 10 }}
 
     # fallback per-path limit
     - key: PATH

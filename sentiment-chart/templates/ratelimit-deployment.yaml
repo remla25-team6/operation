@@ -8,6 +8,8 @@ spec:
   selector:
     matchLabels:
       app: {{ .Release.Name }}-ratelimit
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
@@ -15,11 +17,16 @@ spec:
     spec:
       containers:
       - name: ratelimit
-        image: envoyproxy/ratelimit:master
+        image: envoyproxy/ratelimit:30a4ce1a # from istio release 1.26
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/ratelimit"]
         ports:
-        - containerPort: 8080
-        - containerPort: 8081
-        - containerPort: 6070
+        - name: http
+          containerPort: 8080
+        - name: grpc
+          containerPort: 8081
+        - name: debug
+          containerPort: 6070
         env:
         - name: LOG_LEVEL
           value: debug
@@ -33,6 +40,14 @@ spec:
           value: /data
         - name: RUNTIME_SUBDIRECTORY
           value: ratelimit
+        - name: RUNTIME_WATCH_ROOT
+          value: "false"
+        - name: RUNTIME_IGNOREDOTFILES
+          value: "true"
+        - name: HOST
+          value: "::"
+        - name: GRPC_HOST
+          value: "::"
         volumeMounts:
         - name: config-volume
           mountPath: /data/ratelimit/config
@@ -40,6 +55,7 @@ spec:
       - name: config-volume
         configMap:
           name: {{ .Release.Name }}-ratelimit-config
+      restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
@@ -52,12 +68,15 @@ spec:
   - name: http
     port: 8080
     targetPort: 8080
+    protocol: TCP
   - name: grpc
     port: 8081
     targetPort: 8081
+    protocol: TCP
   - name: debug
     port: 6070
     targetPort: 6070
+    protocol: TCP
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -76,8 +95,11 @@ spec:
       containers:
       - name: redis
         image: redis:alpine
+        imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 6379
+        - name: redis
+          containerPort: 6379
+      restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
@@ -87,6 +109,8 @@ spec:
   selector:
     app: {{ .Release.Name }}-redis
   ports:
-  - port: 6379
+  - name: redis
+    port: 6379
     targetPort: 6379
+    protocol: TCP
 {{- end }}
