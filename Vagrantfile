@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
     config.vm.provider "virtualbox" do |vb|
       vb.gui = false
       vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
-      vb.customize ["modifyvm", :id, "--1024nictype2", "virtio"]
+      vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
       vb.customize ["modifyvm", :id, "--ioapic", "on"]
       vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
       vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
@@ -35,7 +35,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "ctrl" do |ctrl|
     if has_vmware
       ctrl.vm.provider "vmware_desktop" do |vb|
-        vb.vmx["memsize"] = "4096"
+        vb.vmx["memsize"] = "6000"
         vb.vmx["numvcpus"] = "4"
         vb.linked_clone = false
       end
