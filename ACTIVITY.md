@@ -105,8 +105,8 @@
 - Approval:
 
 -- Alex: --
-- Created PR:
-- Approval:
+- Created PR: https://github.com/remla25-team6/operation/pull/44 (related to A5)
+- Approval: https://github.com/remla25-team6/operation/pull/42
 
 -- Inaesh: --
 - Created PR: https://github.com/remla25-team6/operation/pull/43 (related to A5)
@@ -114,7 +114,7 @@
 
 -- Maarten --
 - Created PR:
-- Approval:
+- Approval: https://github.com/remla25-team6/operation/pull/44
 
 -- Martijn --
 - Created PR:
