@@ -102,7 +102,7 @@
 
 -- Sten: --
 - Created PR: https://github.com/remla25-team6/operation/pull/42 (related to A5)
-- Approval:
+- Approval: https://github.com/remla25-team6/operation/pull/45
 
 -- Alex: --
 - Created PR: https://github.com/remla25-team6/operation/pull/44 (related to A5)
@@ -113,7 +113,7 @@
 - Approval: https://github.com/remla25-team6/model-training/pull/9
 
 -- Maarten --
-- Created PR:
+- Created PR: https://github.com/remla25-team6/operation/pull/45 (related to A3)
 - Approval: https://github.com/remla25-team6/operation/pull/44
 
 -- Martijn --
