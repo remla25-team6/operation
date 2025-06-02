@@ -35,8 +35,7 @@ spec:
           value: ratelimit
         volumeMounts:
         - name: config-volume
-          mountPath: /data/ratelimit/config/config.yaml
-          subPath: config.yaml
+          mountPath: /data/ratelimit/config
       volumes:
       - name: config-volume
         configMap:

@@ -47,12 +47,10 @@ spec:
         operation: MERGE
         value:
           rate_limits:
-            # Rate limit based on client IP address
             - actions:
               - remote_address: {}
-            # Fallback rate limit based on path
             - actions:
               - request_headers:
                   header_name: ":path"
-                  descriptor_key: "PATH"
+                  descriptor_key: "PATH"    # bucket key "PATH"
 {{- end }}

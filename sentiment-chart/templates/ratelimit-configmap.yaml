@@ -1,4 +1,3 @@
-{{- if .Values.rateLimit.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,14 +6,16 @@ data:
   config.yaml: |
     domain: ratelimit
     descriptors:
-      # Rate limit per IP address - 10 requests per minute
-      - key: REMOTE_ADDRESS
+    # per-IP limit
+    - key: remote_address
+      descriptors:
+      - key: ""                # match every IP value
         rate_limit:
           unit: minute
           requests_per_unit: {{ .Values.rateLimit.userLimit | default 10 }}
-      # Fallback rate limit for requests without IP
-      - key: PATH
-        rate_limit:
-          unit: minute
-          requests_per_unit: {{ .Values.rateLimit.globalLimit | default 100 }}
-  {{- end }}
+
+    # fallback per-path limit
+    - key: PATH
+      rate_limit:
+        unit: minute
+        requests_per_unit: {{ .Values.rateLimit.globalLimit | default 100 }}
