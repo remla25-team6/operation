@@ -28,3 +28,9 @@ grafana:
     enabled: true
     # namespace: monitoring
     jsonFileName: app-custom-dashboard.json
+
+# Rate limiter (see ratelimit-configmap and envoyfilter)
+rateLimit:
+  enabled: true
+  userLimit: 10  # requests per minute per user
+  globalLimit: 20  # fallback limit if no ip
