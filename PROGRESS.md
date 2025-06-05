@@ -14,35 +14,24 @@
 
 ### Containers and Orchestration
 1. **Exposing a model via REST:** Sufficient 🟠
-    - An ENV variable deﬁnes the DNS name and port of the model-service .
-    - All server endpoints have a well-deﬁned API deﬁnition that follows the Open API Speciﬁcation, and documents at least a summary, the parameters, and the response.
-    - The listening port of the model-service can be conﬁgured through an ENV variable.
-2. **Docker compose operation:** Good 🟡
-   - The Docker compose file uses a volume mapping, a port mapping, and an environment variable.
+    - All server endpoints have a well-deﬁned API deﬁnition that follows the Open API Speciﬁcation, and documents at least a summary, the parameters, and the response (for the `app` repository).
+2. **Docker compose operation:** Excellent ✅
 
 # A2. Provisioning & Kubernetes
 ### Provisioning
 1. **Setting up (Virtual) Infrastructure:**  Good 🟡
     - Vagrant generates a valid inventory.cfg for Ansible that contains all (and only) the active nodes.
 3. **Setting up Software Environment:** Excellent ✅
-5. **Setting up Kubernetes:** Good 🟡
-    - Cluster has an HTTPS Ingress Controller (e.g., Nginx) with self-signed certificates.
+5. **Setting up Kubernetes:** Excellent ✅
   
 # A3. Operate & Monitor Kubernetes
 ### Kubernetes & Monitoring
 1. **Kubernetes Usage**: Excellent ✅
 2. **Helm Installation:** Excellent ✅
-3. **App Monitoring:** Sufficient 🟠
+3. **App Monitoring:** Good 🟡
     - An app-specific Histogram metric is introduced.
     - Each metric types has at least one example, in which the metric is broken down with labels.
-    - An AlertManager is configured with at least one non-trivial PrometheusRule.
-    - A corresponding Alert is raised in any type of channel (e.g., via email).
-    - The deployment files and the source code must not contain credentials (e.g., SMTP passwords).
-5. **Grafana:** Sufficient 🟠
-    - The dashboard contains specific visualizations for Gauges and Counters.
-    - The dashboard employs variable timeframe selectors to parameterize the queries.
-    - The dashboard applies functions (like rate or avg ) to enhance the plots.
-    - The Grafana dashboard is automatically installed, e.g., through a ConfigMap.
+5. **Grafana:** Excellent ✅
 
 # A4. ML Testing and Config Management
 ### ML Testing:
