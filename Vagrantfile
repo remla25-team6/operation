@@ -3,7 +3,7 @@ has_vmware = Vagrant.has_plugin?("vagrant-vmware-desktop")
 
 # Choose box based on provider availability
 BOX = "bento/ubuntu-24.04"
-WORKER_MEMORY = ENV.fetch("WORKER_MEM", 2048).to_i
+WORKER_MEMORY = ENV.fetch("WORKER_MEM", 3000).to_i
 NUM_WORKERS = ENV.fetch("NUM_WORKERS", 2).to_i
 shared_folder_path = File.expand_path("./shared")
 
@@ -49,7 +49,7 @@ Vagrant.configure("2") do |config|
     ctrl.vm.network "private_network", ip: "192.168.56.100"
     ctrl.vm.hostname = "ctrl"
 
-    # ctrl.vm.synced_folder shared_folder_path, "/mnt/shared"
+    ctrl.vm.synced_folder shared_folder_path, "/mnt/shared"
 
     ctrl.vm.provision "ansible" do |ansible|
       ansible.playbook = "ansible/ctrl.yml"
@@ -77,7 +77,7 @@ Vagrant.configure("2") do |config|
       node.vm.network "private_network", ip: "192.168.56.#{i + 100}"
       node.vm.hostname = "node-#{i}"
 
-      # node.vm.synced_folder shared_folder_path, "/mnt/shared"
+      node.vm.synced_folder shared_folder_path, "/mnt/shared"
 
       node.vm.provision "ansible" do |ansible|
         ansible.playbook = "ansible/node.yml"

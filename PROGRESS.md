@@ -9,8 +9,7 @@
     - After a stable release, main is set to a pre-release version that is higher than the latest release.
     - The released container images support multiple architectures, at least amd64 and arm64 .
     - The Dockerﬁle uses multiple stages, e.g., to reduce image size by avoiding apt cache in image.
-2. **Software reuse in libraries:** Good 🟡
-    - A local cache is used so the model is not just downloaded on every container start.
+2. **Software reuse in libraries:** Excellent ✅
 
 ### Containers and Orchestration
 1. **Exposing a model via REST:** Excellent ✅

@@ -20,16 +20,19 @@ spec:
       containers:
         - name: model-service
           image: {{ .Values.model.image }}
+          env:
+            - name: ML_MODEL_VERSION
+              value: {{ .Values.model.mlModelVersion }}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           volumeMounts:
-            - mountPath: /mnt/shared
-              name: my-volume
+            - mountPath: /app/model_cache
+              name: model-cache-volume
       volumes:
-        - name: my-volume
+        - name: model-cache-volume
           hostPath:
-            path: {{ .Values.sharedVolume.path }}
+            path: {{ .Values.modelCacheVolume.path }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -53,13 +56,16 @@ spec:
       containers:
         - name: model-service
           image: {{ .Values.model.image2 }}
+          env:
+            - name: ML_MODEL_VERSION
+              value: {{ .Values.model.mlModelVersion2 }}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           volumeMounts:
-            - mountPath: /mnt/shared
-              name: my-volume
+            - mountPath: /app/model_cache
+              name: model-cache-volume
       volumes:
-        - name: my-volume
+        - name: model-cache-volume
           hostPath:
-            path: {{ .Values.sharedVolume.path }}
+            path: {{ .Values.modelCacheVolume.path }}
