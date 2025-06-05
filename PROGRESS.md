@@ -13,7 +13,7 @@
     - A local cache is used so the model is not just downloaded on every container start.
 
 ### Containers and Orchestration
-1. **Exposing a model via REST:** Sufficient 🟠
+1. **Exposing a model via REST:** Excellent ✅
     - All server endpoints have a well-deﬁned API deﬁnition that follows the Open API Speciﬁcation, and documents at least a summary, the parameters, and the response (for the `app` repository).
 2. **Docker compose operation:** Excellent ✅
 
