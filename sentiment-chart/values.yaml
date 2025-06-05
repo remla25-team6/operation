@@ -2,6 +2,8 @@ model:
   image: ghcr.io/remla25-team6/model-service:latest
   image2: ghcr.io/remla25-team6/model-service:latest
   host: model-service:8080
+  mlModelVersion: "v0.1.0"
+  mlModelVersion2: "v0.1.0"
 
 app:
   image: ghcr.io/remla25-team6/app:latest

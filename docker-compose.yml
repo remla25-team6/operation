@@ -1,6 +1,8 @@
   services:
     model_service:
       image: ${MODEL_IMAGE}
+      environment:
+        - ML_MODEL_VERSION=${ML_MODEL_VERSION}
       container_name: model-service
       restart: unless-stopped
       volumes:

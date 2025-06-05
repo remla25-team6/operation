@@ -20,6 +20,9 @@ spec:
       containers:
         - name: model-service
           image: {{ .Values.model.image }}
+          env:
+            - name: ML_MODEL_VERSION
+              value: {{ .Values.model.mlModelVersion }}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -53,6 +56,9 @@ spec:
       containers:
         - name: model-service
           image: {{ .Values.model.image2 }}
+          env:
+            - name: ML_MODEL_VERSION
+              value: {{ .Values.model.mlModelVersion2 }}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
