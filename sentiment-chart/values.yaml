@@ -19,7 +19,7 @@ metrics:
 secret:
   foo: PGV4YW1wbGVfc2VjcmV0Pg==
 
-sharedVolume:
+modelCacheVolume:
   path: /mnt/shared
 
 
