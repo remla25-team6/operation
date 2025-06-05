@@ -7,7 +7,7 @@
       container_name: model-service
       restart: unless-stopped
       volumes:
-        - ./model:/app/folder
+        - model_cache:/app/model_cache
       secrets:
         - example_secret
 
@@ -22,11 +22,12 @@
         - model_service
       container_name: app
       restart: unless-stopped
-      volumes:
-        - ./model:/app/folder
       secrets:
         - example_secret
 
   secrets:
     example_secret:
       file: ./secrets/example_secret.txt
+
+  volumes:
+    model_cache:
