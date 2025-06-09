@@ -125,7 +125,7 @@
 
 -- Sten: --
 - Created PR: https://github.com/remla25-team6/operation/pull/53 (related to A1)
-- Approval:
+- Approval: https://github.com/remla25-team6/app/pull/6
 
 -- Alex: --
 - Created PR:
