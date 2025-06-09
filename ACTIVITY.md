@@ -140,9 +140,8 @@
 
 -- Maarten --
 - Created PR:
-- Created PR:
-- Approval:
+- Approval: https://github.com/remla25-team6/model-training/pull/11
 
 -- Martijn --
 - Created PR:
-- Approval:
+- Approval: https://github.com/remla25-team6/model-training/pull/12
