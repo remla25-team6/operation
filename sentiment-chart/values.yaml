@@ -1,13 +1,13 @@
 model:
-  image: ghcr.io/remla25-team6/model-service:latest
-  image2: ghcr.io/remla25-team6/model-service:latest
+  image: ghcr.io/remla25-team6/model-service:0.2.2-pre.20250609.165306
+  image2: ghcr.io/remla25-team6/model-service:0.2.2-pre.20250609.165306
   host: model-service:8080
   mlModelVersion: "v0.1.0"
   mlModelVersion2: "v0.1.0"
 
 app:
-  image: ghcr.io/remla25-team6/app:latest
-  image2: ghcr.io/remla25-team6/app:latest
+  image: ghcr.io/remla25-team6/app:0.1.latest
+  image2: ghcr.io/remla25-team6/app:0.0.latest #experimental version
 
 metrics:
   enabled: true
