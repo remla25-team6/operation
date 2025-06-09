@@ -6,14 +6,12 @@
 
 ### Versioning and Releases
 1. **Automated release process:** Good 🟡
-    - After a stable release, main is set to a pre-release version that is higher than the latest release.
     - The released container images support multiple architectures, at least amd64 and arm64 .
     - The Dockerﬁle uses multiple stages, e.g., to reduce image size by avoiding apt cache in image.
 2. **Software reuse in libraries:** Excellent ✅
 
 ### Containers and Orchestration
 1. **Exposing a model via REST:** Excellent ✅
-    - All server endpoints have a well-deﬁned API deﬁnition that follows the Open API Speciﬁcation, and documents at least a summary, the parameters, and the response (for the `app` repository).
 2. **Docker compose operation:** Excellent ✅
 
 # A2. Provisioning & Kubernetes
@@ -44,10 +42,8 @@
 
 ### ML Configuration Management
 1. **Project Organization:** Excellent ✅
-2. **Pipeline Management with DVC:** Good 🟡
-    - Different metrics are reported that go beyond model accuracy.
-4. **Code Quality:** Poor 🔴
-    - Running pylint does not show any warnings for the project.
+2. **Pipeline Management with DVC:** Excellent ✅
+4. **Code Quality:** Poor Excellent ✅
   
 # A5. Istio Service Mesh
 ### Implementation
