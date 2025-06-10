@@ -145,3 +145,25 @@
 -- Martijn --
 - Created PR:
 - Approval: https://github.com/remla25-team6/model-training/pull/12
+
+### Week 8 (June 9+)
+
+-- Sten: --
+- Created PR:
+- Approval:
+
+-- Alex: --
+- Created PR:
+- Approval:
+
+-- Inaesh: --
+- Created PR:
+- Approval:
+
+-- Maarten --
+- Created PR:
+- Approval:
+
+-- Martijn --
+- Created PR:
+- Approval:
