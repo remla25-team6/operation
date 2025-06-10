@@ -6,8 +6,8 @@ model:
   mlModelVersion2: "v0.1.0"
 
 app:
-  image: ghcr.io/remla25-team6/app:0.1.latest
-  image2: ghcr.io/remla25-team6/app:0.0.latest #experimental version
+  image: ghcr.io/remla25-team6/app:0.1.1
+  image2: ghcr.io/remla25-team6/app:0.0.7 #experimental version
 
 metrics:
   enabled: true
