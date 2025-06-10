@@ -149,12 +149,12 @@
 ### Week 8 (June 9+)
 
 -- Sten: --
-- Created PR:
+- Created PR: https://github.com/remla25-team6/model-training/pull/13
 - Approval:
 
 -- Alex: --
-- Created PR:
-- Approval:
+- Created PR: 
+- Approval: https://github.com/remla25-team6/model-training/pull/13
 
 -- Inaesh: --
 - Created PR:
