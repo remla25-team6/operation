@@ -31,10 +31,8 @@
 
 # A4. ML Testing and Config Management
 ### ML Testing:
-1. **Automated Tests:** Sufficient 🟠
-    - The cost of features is being tested.
-    - Test adequacy is measured and reported on the terminal when running the tests.
-    - There is an implementation of mutamorphic testing with automatic inconsistency repair.
+1. **Automated Tests:** Good 🟡
+    - Every requirement is completed for excellent, except for _"There is an implementation of mutamorphic testing with automatic inconsistency repair."_
 3. **Continous Training:** Good 🟡
     - Test adequacy metrics (e.g., ML Test Score) are calculated during the workflow execution.
     - The test adequacy score is added and automatically updated in the README.
