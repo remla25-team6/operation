@@ -33,9 +33,7 @@
 ### ML Testing:
 1. **Automated Tests:** Good 🟡
     - Every requirement is completed for excellent, except for _"There is an implementation of mutamorphic testing with automatic inconsistency repair."_
-3. **Continous Training:** Good 🟡
-    - Test adequacy metrics (e.g., ML Test Score) are calculated during the workflow execution.
-    - The test adequacy score is added and automatically updated in the README.
+3. **Continous Training:** Excellent ✅
 
 ### ML Configuration Management
 1. **Project Organization:** Excellent ✅
