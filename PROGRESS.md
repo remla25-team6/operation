@@ -5,9 +5,7 @@
     - User input is leveraged for validation or growing dataset (not yet connected).
 
 ### Versioning and Releases
-1. **Automated release process:** Good 🟡
-    - The released container images support multiple architectures, at least amd64 and arm64 .
-    - The Dockerﬁle uses multiple stages, e.g., to reduce image size by avoiding apt cache in image.
+1. **Automated release process:** Excellent ✅
 2. **Software reuse in libraries:** Excellent ✅
 
 ### Containers and Orchestration
