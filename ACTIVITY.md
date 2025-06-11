@@ -160,6 +160,7 @@
 -- Inaesh: --
 - Created PR:
 - Approval: https://github.com/remla25-team6/model-service/pull/12
+- Approval: https://github.com/remla25-team6/app/pull/7
 
 -- Maarten --
 - Created PR:
