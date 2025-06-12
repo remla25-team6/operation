@@ -158,7 +158,8 @@
 - Approval (and helped): https://github.com/remla25-team6/model-training/pull/13 (related to A4)
 
 -- Inaesh: --
-- Created PR:
+- Created PR: https://github.com/remla25-team6/operation/pull/58 (related to A2)
+- Created PR: https://github.com/remla25-team6/model-training/pull/14 (related to A4)
 - Approval: https://github.com/remla25-team6/model-service/pull/12
 - Approval: https://github.com/remla25-team6/app/pull/7
 
