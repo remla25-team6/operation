@@ -78,6 +78,12 @@ chmod +x deploy-app.sh
 ./deploy-app.sh
 ```
 
+or, for macOS users (intel only): 
+```bash
+chmod +x deploy-app-mac.sh
+```
+
+
 
 If ```.monitoring.env``` is not present the script will prompt you for the required values that need to be set and it will export them for you automatically.
 
