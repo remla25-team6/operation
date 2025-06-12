@@ -7,6 +7,10 @@ WORKER_MEMORY = ENV.fetch("WORKER_MEM", 3000).to_i
 NUM_WORKERS = ENV.fetch("NUM_WORKERS", 2).to_i
 shared_folder_path = File.expand_path("./shared")
 
+CTRL_IP = "192.168.56.100"
+NODE_IPS = (1..NUM_WORKERS).map { |i| "192.168.56.#{100 + i}" }
+INVENTORY_PATH = "ansible/inventory.cfg"
+
 Vagrant.configure("2") do |config|
   config.vm.box = BOX
 
@@ -46,19 +50,19 @@ Vagrant.configure("2") do |config|
       end
     end
 
-    ctrl.vm.network "private_network", ip: "192.168.56.100"
+    ctrl.vm.network "private_network", ip: CTRL_IP
     ctrl.vm.hostname = "ctrl"
-
     ctrl.vm.synced_folder shared_folder_path, "/mnt/shared"
 
     ctrl.vm.provision "ansible" do |ansible|
       ansible.playbook = "ansible/ctrl.yml"
+      ansible.inventory_path = INVENTORY_PATH
       ansible.extra_vars = {
         num_workers: NUM_WORKERS
       }
     end
   end
-
+  
   (1..NUM_WORKERS).each do |i|
     config.vm.define "node-#{i}" do |node|
       if has_vmware
@@ -74,16 +78,40 @@ Vagrant.configure("2") do |config|
         end
       end
 
-      node.vm.network "private_network", ip: "192.168.56.#{i + 100}"
+      node.vm.network "private_network", ip: NODE_IPS[i - 1]
       node.vm.hostname = "node-#{i}"
-
       node.vm.synced_folder shared_folder_path, "/mnt/shared"
 
       node.vm.provision "ansible" do |ansible|
         ansible.playbook = "ansible/node.yml"
-        ansible.extra_vars = {
-          num_workers: NUM_WORKERS
-        }
+        ansible.inventory_path = INVENTORY_PATH
+        ansible.extra_vars = { num_workers: NUM_WORKERS }
+      end
+    end
+  end
+
+  config.trigger.after [:up, :reload] do |trigger|
+    trigger.name = "Generate Ansible inventory"
+    trigger.ruby do
+      File.open(INVENTORY_PATH, "w") do |file|
+        file.puts "[controller]"
+        file.puts "ctrl ansible_host=#{CTRL_IP} ansible_ssh_private_key_file=.vagrant/machines/ctrl/virtualbox/private_key ansible_ssh_common_args='-o IdentitiesOnly=yes'"
+        file.puts ""
+
+        file.puts "[nodes]"
+        NODE_IPS.each_with_index do |ip, i|
+          file.puts "node-#{i + 1} ansible_host=#{ip} ansible_ssh_private_key_file=.vagrant/machines/node-#{i + 1}/virtualbox/private_key ansible_ssh_common_args='-o IdentitiesOnly=yes'"
+        end
+
+        file.puts ""
+        file.puts "[all:children]"
+        file.puts "controller"
+        file.puts "nodes"
+
+        file.puts ""
+        file.puts "[all:vars]"
+        file.puts "ansible_user=vagrant"
+        file.puts "ansible_python_interpreter=/usr/bin/python3"
       end
     end
   end
