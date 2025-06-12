@@ -2,6 +2,7 @@ import requests
 import urllib3
 import matplotlib.pyplot as plt
 import numpy as np
+import time 
 
 URL = "https://192.168.56.92/"
 
@@ -22,7 +23,7 @@ class sample_request:
         self.URL = URL
         self.pr=pr
         self.cached_payload = "Some review to analyse that will be re-submitted with some probability"
-        self.non_cached_payload = 1 # To ensure that no duplicates are used instead if wanted, this integer is incremented in every new request that DOESNT have a chaced hit.
+        self.non_cached_payload = 1 # To ensure that no duplicates are sent on accident, this integer is incremented in every new request that DOESNT have a chaced hit.
         self.headerv1 = {
         'x-version': "v1"
         }
@@ -38,45 +39,43 @@ class sample_request:
         self.cached_sent_v2 = 0
     
     def send_with_prob(self):
-        # This assumes a 50/50 probability split between v1/v2 for convinience
         # Probability here refers to the probability that a cached input is provided (default = 5 percent)
-        alpha = np.random.random()
         pr_repeat = np.random.random()
-        if alpha > 0.5:
-            self.requests_v1 += 1
-            r = self.send_v1(repeat=(self.pr > pr_repeat))
-        else:
-            self.requests_v2 += 1
-            r = self.send_v2(repeat=(self.pr > pr_repeat))
+
+        # Send request to v1
+        self.requests_v1 += 1
+        _, input = self.send_v1(repeat=(self.pr > pr_repeat))
+
+        # Send request to v2
+        self.requests_v2 += 1
+        _, _ = self.send_v2(repeat=(self.pr > pr_repeat))
         self.requests_sent += 1
 
-        return (alpha > 0.5), (self.pr > pr_repeat), r
+        self.non_cached_payload += 1
+        return (self.pr > pr_repeat), _, input
         
+    # Send POST to image v1
     def send_v1(self, repeat=False):
-        if not repeat:
-            self.non_cached_payload += 1
-        else:
-            self.cached_sent_v1 += 1
+        self.cached_sent_v1 += 1
         data = {
             'review': (str(self.non_cached_payload) if (not repeat) else self.cached_payload)
             }
-        return requests.post(self.URL, headers=self.headerv1, data=data, verify=False)
+        return requests.post(self.URL, headers=self.headerv1, data=data, verify=False), ((str(self.non_cached_payload) if (not repeat) else self.cached_payload))
     
+    # Send POST to image v2
     def send_v2(self, repeat=False):
-        if not repeat:
-            self.non_cached_payload += 1
-        else:
-            self.cached_sent_v2 += 1
+        self.cached_sent_v2 += 1
         data = {
             'review': (str(self.non_cached_payload) if (not repeat) else self.cached_payload)
             }
-        return requests.post(self.URL, headers=self.headerv2, data = data, verify=False)
+        return requests.post(self.URL, headers=self.headerv2, data = data, verify=False), ((str(self.non_cached_payload) if (not repeat) else self.cached_payload))
         
     def run_experiment(self, number_of_requests):
         for i in range (number_of_requests):
-            was_v1, was_cached, res = self.send_with_prob()
-            print((bcolors.OKGREEN if was_v1 else bcolors.OKBLUE) + f"Sent a request to: {"v1" if was_v1 else "v2"} with a {"cached" if was_cached else "non_cached"} input" + bcolors.ENDC)
-
+            was_cached, _, input = self.send_with_prob()
+            print((bcolors.OKGREEN) + f"Sent a request to: {"v1"} with a {"cached" if was_cached else "non_cached"} input: {input}" + bcolors.ENDC)
+            print((bcolors.OKCYAN) + f"Sent a request to: {"v2"} with a {"cached" if was_cached else "non_cached"} input: {input}" + bcolors.ENDC)
+            time.sleep(0.3)
         print(bcolors.OKCYAN + f"Sent {self.requests_sent} total requests" + bcolors.ENDC)
         print(bcolors.OKCYAN + f"Sent {self.requests_v1} requests to V1 of which {self.cached_sent_v1} were repeat inputs" + bcolors.ENDC)
         print(bcolors.OKCYAN + f"Sent {self.requests_v2} requests to V2 of which {self.cached_sent_v2} were repeat inputs" + bcolors.ENDC)
@@ -85,8 +84,8 @@ class sample_request:
     
 
 def run():
-    req = sample_request(URL, pr=0.05)
-    req.run_experiment(500)
+    req = sample_request(URL, pr=0.9)
+    req.run_experiment(5000)
 
 
 

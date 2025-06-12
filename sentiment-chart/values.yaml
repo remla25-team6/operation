@@ -6,7 +6,7 @@ model:
   mlModelVersion2: "v0.1.0"
 
 app:
-  image: ghcr.io/remla25-team6/app:latest
+  image: ghcr.io/remla25-team6/app:0.1.1
   image2: ghcr.io/remla25-team6/app:0.1.0-experimental #experimental version
 
 metrics:
@@ -30,3 +30,4 @@ grafana:
     enabled: true
     # namespace: monitoring
     jsonFileName: app-custom-dashboard.json
+    experimentJSON: experiment-dashboard.json
