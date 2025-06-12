@@ -14,4 +14,7 @@ data:
   {{- $fileName := .Values.grafana.dashboard.jsonFileName | default "app-custom-dashboard.json" }}
   {{ $fileName }}: |-
 {{ (.Files.Get $fileName) | indent 4 }}
+  {{- $fileName2 := .Values.grafana.dashboard.experimentJSON | default "experiment-dashboard.json" }}
+  {{ $fileName2 }}: |-
+{{ (.Files.Get $fileName2) | indent 4 }}
 {{- end }}

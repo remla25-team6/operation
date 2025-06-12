@@ -8,6 +8,7 @@ spec:
   hosts:
   - "*"
   http:
+    # Matching for pre-determined version
     - match:
         - headers:
             x-version:
@@ -24,12 +25,44 @@ spec:
         - destination:
             host: {{ .Release.Name }}-app
             subset: v1
+
+    # Matching for cookie:
+    ## Matching for v1
+    - match:
+        - headers:
+            cookie:
+              regex: "(^|.*; )user-version=v1($|; .*)"
+      route:
+        - destination:
+            host: {{ .Release.Name }}-app
+            subset: v1
+
+    ## Matching for v2
+    - match:
+        - headers:
+            cookie:
+              regex: "(^|.*; )user-version=v2($|; .*)"
+      route:
+        - destination:
+            host: {{ .Release.Name }}-app
+            subset: v2
+
+    # No match -> No cookie or predetermined version
+    # This adds a Set-Cookie response header
     - route:
       - destination:
           host: {{ .Release.Name }}-app
           subset: v1
         weight: 90
+        headers:
+          response:
+            set:
+              set-cookie: "user-version=v1; Path=/; Max-Age=3600"
       - destination:
           host: {{ .Release.Name }}-app
           subset: v2
         weight: 10       
+        headers:
+          response:
+            set:
+              set-cookie: "user-version=v2; Path=/; Max-Age=3600"
