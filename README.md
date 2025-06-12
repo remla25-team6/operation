@@ -81,7 +81,7 @@ On each run the deployment script will prompt the user for the possibility of a 
 ```bash
 vagrant up  # Start vagrant and provision
 ansible-galaxy collection install -r requirements.yml # Install required Ansible collections
-ansible-playbook -u vagrant --private-key=.vagrant/machines/ctrl/virtualbox/private_key -i 192.168.56.100, finalization.yml  # Run final provisioning steps
+ansible-playbook -i ansible/inventory.cfg finalization.yml  # Run final provisioning steps
 ```
 
 ##### 1a. To open the Kubernetes Dashboard without a tunnel (optional):
