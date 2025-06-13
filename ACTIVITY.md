@@ -164,7 +164,7 @@
 - Approval: https://github.com/remla25-team6/app/pull/7
 
 -- Maarten --
-- Created PR:
+- Created PR: https://github.com/remla25-team6/operation/pull/60 (related to A5)
 - Approval:
 
 -- Martijn --
