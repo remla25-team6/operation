@@ -150,7 +150,7 @@
 
 -- Sten: --
 - Created PR: https://github.com/remla25-team6/model-training/pull/13 (related to A4)
-- Approval:
+- Approval: https://github.com/remla25-team6/model-training/pull/14
 
 -- Alex: --
 - Created PR: https://github.com/remla25-team6/model-service/pull/12 (related to A1)
