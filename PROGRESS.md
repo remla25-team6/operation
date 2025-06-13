@@ -5,9 +5,7 @@
     - User input is leveraged for validation or growing dataset (not yet connected).
 
 ### Versioning and Releases
-1. **Automated release process:** Good 🟡
-    - The released container images support multiple architectures, at least amd64 and arm64 .
-    - The Dockerﬁle uses multiple stages, e.g., to reduce image size by avoiding apt cache in image.
+1. **Automated release process:** Excellent ✅
 2. **Software reuse in libraries:** Excellent ✅
 
 ### Containers and Orchestration
@@ -16,8 +14,7 @@
 
 # A2. Provisioning & Kubernetes
 ### Provisioning
-1. **Setting up (Virtual) Infrastructure:**  Good 🟡
-    - Vagrant generates a valid inventory.cfg for Ansible that contains all (and only) the active nodes.
+1. **Setting up (Virtual) Infrastructure:**  Excellent ✅
 3. **Setting up Software Environment:** Excellent ✅
 5. **Setting up Kubernetes:** Excellent ✅
   
@@ -26,24 +23,18 @@
 1. **Kubernetes Usage**: Excellent ✅
 2. **Helm Installation:** Excellent ✅
 3. **App Monitoring:** Good 🟡
-    - An app-specific Histogram metric is introduced.
     - Each metric types has at least one example, in which the metric is broken down with labels.
 5. **Grafana:** Excellent ✅
 
 # A4. ML Testing and Config Management
 ### ML Testing:
-1. **Automated Tests:** Sufficient 🟠
-    - The cost of features is being tested.
-    - Test adequacy is measured and reported on the terminal when running the tests.
-    - There is an implementation of mutamorphic testing with automatic inconsistency repair.
-3. **Continous Training:** Good 🟡
-    - Test adequacy metrics (e.g., ML Test Score) are calculated during the workflow execution.
-    - The test adequacy score is added and automatically updated in the README.
+1. **Automated Tests:** Excellent ✅
+3. **Continous Training:** Excellent ✅
 
 ### ML Configuration Management
 1. **Project Organization:** Excellent ✅
 2. **Pipeline Management with DVC:** Excellent ✅
-4. **Code Quality:** Poor Excellent ✅
+4. **Code Quality:** Excellent ✅
   
 # A5. Istio Service Mesh
 ### Implementation
