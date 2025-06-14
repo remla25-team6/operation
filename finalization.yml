@@ -301,19 +301,7 @@
             name: default
             labels:
               istio-injection: enabled
-              
-    - name: Deploy rate limiting service
-      kubernetes.core.k8s:
-        state: present
-        definition:
-          apiVersion: v1
-          kind: Namespace
-          metadata:
-            name: ratelimit
-            labels:
-              istio-injection: enabled
-
-              
+                     
     - name: Create monitoring namespace
       kubernetes.core.k8s:
         state: present
