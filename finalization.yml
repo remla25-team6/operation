@@ -301,8 +301,7 @@
             name: default
             labels:
               istio-injection: enabled
-
-              
+                     
     - name: Create monitoring namespace
       kubernetes.core.k8s:
         state: present
