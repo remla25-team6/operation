@@ -323,6 +323,33 @@
           metadata:
             name: monitoring
 
+    - name: Create Grafana password Secret
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: grafana-admin-secret
+            namespace: monitoring
+          type: Opaque
+          stringData:
+            admin-user: "{{ lookup('ansible.builtin.env', 'GRAFANA_ADMIN_USER') }}"
+            admin-password: "{{ lookup('ansible.builtin.env', 'GRAFANA_ADMIN_PASSWORD') }}"
+
+    - name: Create AlertManager SMTP secret
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: alertmanager-smtp-secret
+            namespace: monitoring
+          type: Opaque
+          stringData:
+            password: "{{ lookup('ansible.builtin.env', 'SMTP_PASSWORD') }}"
+
     - name: Add Prometheus community Helm repository
       kubernetes.core.helm_repository: 
         name: prometheus-community
@@ -373,8 +400,10 @@
           # Grafana Configuration
           grafana:
             enabled: true
-            adminUser: admin           
-            adminPassword: admin     
+            admin:
+              existingSecret: "grafana-admin-secret"
+              userKey: admin-user
+              passwordKey: admin-password  
             extraSecretMounts:
               - name: grafana-tls
                 secretName: grafana-tls
@@ -431,4 +460,35 @@
               port: 443
 
           alertmanager:
-            enabled: false
+            enabled: true
+            config:
+              global:
+                resolve_timeout: 5m
+              route:
+                group_by: ['alertname', 'cluster', 'service']
+                group_wait: 10s
+                group_interval: 10s
+                repeat_interval: 12h
+                receiver: 'default-receiver'
+                routes:
+                - match:
+                    severity: critical
+                  receiver: email-notifications
+              receivers:
+              - name: 'default-receiver'
+              - name: 'email-notifications'
+                email_configs:
+                - to: "{{ lookup('ansible.builtin.env', 'ALERT_RECIPIENT') }}"
+                  from: "{{ lookup('ansible.builtin.env', 'ALERT_SENDER') }}"
+                  smarthost: "{{ lookup('ansible.builtin.env', 'SMTP_SERVER') }}"
+                  auth_username: "{{ lookup('ansible.builtin.env', 'SMTP_USERNAME') }}"
+                  auth_password_file: '/etc/alertmanager/secrets/alertmanager-smtp-secret/password'
+                  headers:
+                    Subject: 'Kubernetes Alert: {{ "{{" }} .GroupLabels.alertname {{ "}}" }}'
+                  require_tls: true
+            alertmanagerSpec:
+              secrets:
+                - alertmanager-smtp-secret
+            service:
+              type: LoadBalancer
+              loadBalancerIP: "192.168.56.95"

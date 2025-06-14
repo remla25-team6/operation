@@ -25,7 +25,7 @@
 
 From the root directory:
 
-### With Docker:
+### Using Docker:
 
 ```bash
 echo your_personal_access_token | docker login ghcr.io -u your_github_username --password-stdin     # Login
@@ -35,8 +35,47 @@ docker compose down        # Stop the application
 
 Access the app at: [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
 
-### With Kubernetes
+### Using Kubernetes
+**Before getting started** you will need a SMTP server and credentials that can be used for mail-based alerts.
+The easiest approach is using google in combination with a 16-charachter *app-password*. Learn more about app-passwords [here](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://myaccount.google.com/apppasswords&ved=2ahUKEwig1viZtNONAxU-3gIHHX-BKxEQFnoECBkQAQ&usg=AOvVaw1rVibBR6kQTiUjqa0l_f8W).
 
+To be able to deploy the application the following variables need to be set (here Gmail is used as an example):
+```env
+# Grafana dashboard credentials
+GRAFANA_ADMIN_USER=
+GRAFANA_ADMIN_PASSWORD=
+
+# Email alert related variables
+SMTP_SERVER=smtp.gmail.com:587
+SMTP_USERNAME=<YOUR-GMAIL>
+SMTP_PASSWORD=<YOUR-APP-PASSWORD>
+ALERT_RECIPIENT=
+ALERT_SENDER=<YOUR-GMAIL>
+```
+The above variables *need* to be exported as environment variables. If you are using the startup script then it will prompt you for the above values and store them in a file called ```.monitoring.env``` and on subsequent deployments will read them from this file and *export them for you*.
+
+#### Using the startup script
+
+This approach is the fastest but it requires GNU parallel:
+```bash
+sudo apt-get install parallel
+```
+The entire application can be then deployed using the provided start script:
+```bash
+chmod +x deploy-app.sh
+./deploy-app.sh
+```
+If ```.monitoring.env``` is not present the script will prompt you for the required values that need to be set and it will export them for you automatically.
+
+Note that this automatically adds the following three entries to your ```/etc/hosts``` file, if they are not already present:
+```yaml
+192.168.56.91 dashboard.local
+192.168.56.93 grafana.local
+192.168.56.94 prometheus.local
+```
+On each run the deployment script will prompt the user for the possibility of a cleanup. In case you are experiencing issues with the deployment script trying this cleanup step is recommended. It is not necessary and might not provide benefit to everyone.
+
+#### Manually
 #### 1. Provision the cluster (required for both manual and Helm deployments)
 
 ```bash
@@ -57,24 +96,6 @@ ansible-playbook -u vagrant --private-key=.vagrant/machines/ctrl/virtualbox/priv
 * Visit [https://dashboard.local/](https://dashboard.local/) (https is important) and login using the token created in the previous step
 
 #### 2. Choose one of the following deployment methods:
-
-#### A. Automatic deployment with Ansible and Helm ####
-This approach is the fastest but it requires GNU parallel:
-```bash
-sudo apt-get install parallel
-```
-The entire application can be then deployed using the provided start script:
-```bash
-chmod +x deploy-app.sh
-./deploy-app.sh
-```
-Note that this automatically adds the following three entries to your ```/etc/hosts``` file, if they are not already present:
-```yaml
-192.168.56.91 dashboard.local
-192.168.56.93 grafana.local
-192.168.56.94 prometheus.local
-```
-On each run the deployment script will prompt the user for the possibility of a cleanup. In case you are experiencing issues with the deployment script trying this cleanup step is recommended.
 #### B. Manual deployment with Ansible and raw Kubernetes manifests
 
 ```bash
@@ -104,7 +125,7 @@ helm install <release-name> .  # Install the application using the Helm chart wi
 
 After starting the application:
 
-* Access at: [http://192.168.56.90:80/](http://192.168.56.90:80/)
+* Access at: [https://192.168.56.90:443/](http://192.168.56.90:443/)
 * Under some conditions the app may not be reachable at this IP. If the app is not reachable:
 
   ```bash
@@ -119,7 +140,7 @@ After starting the application:
 ## Accessing Grafana Dashboard
 In order to import the dashboard in grafana and view the metrics open Grafana at:
 
-- http://grafana.local (or 192.168.56.93:443)
+- https://grafana.local (or 192.168.56.93:443)
 
 Next, login using default credentials:
 

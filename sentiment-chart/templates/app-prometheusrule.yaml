@@ -1,0 +1,31 @@
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-app-rules
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+    release: prometheus-stack
+spec:
+  groups:
+  - name: app-availability
+    interval: 30s
+    rules:
+    - alert: AppUnreachable
+      expr: |
+        (
+          absent(up{job="{{ .Release.Name }}-app", namespace="{{ .Release.Namespace }}"}) == 1
+        )
+        or
+        (
+          up{job="{{ .Release.Name }}-app", namespace="{{ .Release.Namespace }}"} == 0
+        )
+      for: 2m
+      labels:
+        severity: critical
+        service: "{{ .Release.Name }}-app"
+      annotations:
+        summary: "Application {{ .Release.Name }}-app is unreachable"
+        description: "The application {{ .Release.Name }}-app in namespace {{ .Release.Namespace }} has been unreachable for more than 2 minutes."
+{{- end }}
