@@ -44,16 +44,7 @@
     - One of the described use cases has been partially realized, with observable effects.
     - One of the described use cases has been realized. It generally works, but falls short in some aspects.
     - One of the described use cases has been fully realized.
-3. **Continous Experimentation:** Insufficient ❌
-    - An experiment is attempted, but lacks either sufficient documentation or implementation.
-    - The documentation describes the experiment. It explains the implemented changes, the expected effect that gets experimented on, and the relevant metric that is tailored to the experiment:
-    - The experiment involves two deployed versions of at least one container image.
-    - Both component versions are reachable through the deployed experiment.
-    - The system implements the metric that allows exploring the concrete hypothesis.
-    - Prometheus picks up the metric.
-    - Grafana has a dashboard to visualize the differences and support the decision process.
-    - The documentation contains a screenshot of the visualization
-    - The documentation explains the decision process for accepting or rejecting the experiment in details, ie.g., which criteria is used and how the available dashboard supports the decision.
+3. **Continous Experimentation:**  Excellent ✅
 
 ### Documentation
 1. **Deployment Documentation:** Insufficient ❌
