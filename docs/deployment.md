@@ -15,7 +15,7 @@ The model-service handles the processing of data. It too is designed to handle c
 Prometheus is used for monitoring the application, collecting metrics, and providing insights into the performance of the deployed services. Grafana is used to visualize these metrics, allowing for easy monitoring and analysis.
 
 ### istio ingress gateway
-The Istio Ingress Gateway is responsible for managing incoming traffic to the application. It routes requests to the appropriate services based on defined rules, enabling canary deployments and traffic splitting between different versions of the app.
+The Istio Ingress Gateway is responsible for managing incoming traffic to the application. It routes requests to the appropriate services based on 90/10 splitting rules, enabling canary deployments.
 
 ## Kubernetes Architecture Overview
 
@@ -75,4 +75,20 @@ The routing process is managed by the Istio Ingress Gateway, which directs incom
     - Sticky sessions ensure that once a user is routed to a specific version of the app, all subsequent requests from that user will be routed to the same version.
 3. **App** The requests are split 90/10 between the two versions of the app (v1 and v2) based on the defined routing rules.
 4. **Model-Service**: The model-service handles the processing of data, with requests being routed to either v1 or v2 based on the defined rules.
+
+## Kubernetes Resources and Relationships
+
+Below is a table of some examples of the Kubernetes resources used in this deployment.
+
+| Resource Type           | Resource Name(s)                                 | Description                                                                                   |
+|------------------------ |--------------------------------------------------|-------------------------------------------------------------------------------------------|
+| Deployment              | `app-v1`, `app-v2`, `model-service-v1`, `model-service-v2` | Deploys the application and model-service pods for each version (canary releases).         |
+| Service                 | `app-service`, `model-service`                   | Exposes the App and Model services internally for communication and metrics scraping.      |
+| Gateway (Istio)         | `istio-ingressgateway`                           | Handles external HTTP(S) traffic into the cluster.                                         |
+| VirtualService (Istio)  | `app-virtualservice`, `model-service-virtualservice` | Routes traffic from the gateway to the correct service/version based on routing rules.     |
+| DestinationRule (Istio) | `app-destinationrule`, `model-service-destinationrule` | Defines subsets (v1, v2) for canary deployments and enables traffic splitting.             |
+| ConfigMap               | `app-config`, `grafana-dashboard-config`         | Stores non-sensitive configuration data for the app and Grafana dashboards.                |
+| Secret                  | `app-secret`                                     | Stores sensitive data such as credentials or tokens.                                       |
+| ServiceMonitor          | `app-servicemonitor`                             | Configures Prometheus to scrape metrics from the App Service.                              |
+| PrometheusRule          | `app-prometheusrule`                             | Defines alerting and recording rules for Prometheus.                                       |
 
