@@ -145,3 +145,28 @@
 -- Martijn --
 - Created PR:
 - Approval: https://github.com/remla25-team6/model-training/pull/12
+
+### Week 8 (June 9+)
+
+-- Sten: --
+- Created PR: https://github.com/remla25-team6/model-training/pull/13 (related to A4)
+- Approval: https://github.com/remla25-team6/model-training/pull/14
+
+-- Alex: --
+- Created PR: https://github.com/remla25-team6/model-service/pull/12 (related to A1)
+- Created PR: https://github.com/remla25-team6/app/pull/7 (related to A1)
+- Approval (and helped): https://github.com/remla25-team6/model-training/pull/13 (related to A4)
+
+-- Inaesh: --
+- Created PR: https://github.com/remla25-team6/operation/pull/58 (related to A2)
+- Created PR: https://github.com/remla25-team6/model-training/pull/14 (related to A4)
+- Approval: https://github.com/remla25-team6/model-service/pull/12
+- Approval: https://github.com/remla25-team6/app/pull/7
+
+-- Maarten --
+- Created PR: https://github.com/remla25-team6/operation/pull/60 (related to A5)
+- Approval:
+
+-- Martijn --
+- Created PR: https://github.com/remla25-team6/operation/pull/61
+- Approval: https://github.com/remla25-team6/operation/pull/58
