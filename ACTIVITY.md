@@ -155,7 +155,7 @@
 -- Alex: --
 - Created PR: https://github.com/remla25-team6/model-service/pull/12 (related to A1)
 - Created PR: https://github.com/remla25-team6/app/pull/7 (related to A1)
-- Created PR: https://github.com/remla25-team6/app/pull/9#issue-3146503388 (related to A3)
+- Created PR: https://github.com/remla25-team6/app/pull/9 (related to A3)
 - Approval (and helped): https://github.com/remla25-team6/model-training/pull/13 (related to A4)
 
 -- Inaesh: --
