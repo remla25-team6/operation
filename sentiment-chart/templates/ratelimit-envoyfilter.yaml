@@ -7,7 +7,7 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      app: model-service
+      app: {{ .Release.Name }}-model-service
   configPatches:
   - applyTo: HTTP_FILTER
     match:
@@ -78,7 +78,7 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      app: app
+      app: {{ .Release.Name }}-app
   configPatches:
   - applyTo: HTTP_FILTER
     match:
