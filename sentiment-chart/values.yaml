@@ -34,5 +34,4 @@ grafana:
 # Rate limiter (see ratelimit-configmap and envoyfilter)
 rateLimit:
   enabled: true
-  userLimit: 10  # requests per minute per user
-  globalLimit: 20  # fallback limit if no ip
+  userLimit: 20  # requests per minute per user

@@ -7,7 +7,7 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      app: model-service
+      app: sentiment-release-model-service
   configPatches:
   - applyTo: HTTP_FILTER
     match:
@@ -22,53 +22,23 @@ spec:
         name: envoy.filters.http.local_ratelimit
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
-          stat_prefix: local_rate_limiter
+          stat_prefix: model_service_rate_limiter
           token_bucket:
-            max_tokens: {{ .Values.rateLimit.globalLimit }}
-            tokens_per_fill: {{ .Values.rateLimit.globalLimit }}
+            max_tokens: {{ .Values.rateLimit.userLimit }}
+            tokens_per_fill: {{ .Values.rateLimit.userLimit }}
             fill_interval: 60s
           filter_enabled:
-            runtime_key: local_rate_limit_enabled
             default_value:
               numerator: 100
               denominator: HUNDRED
           filter_enforced:
-            runtime_key: local_rate_limit_enforced
             default_value:
               numerator: 100
               denominator: HUNDRED
           response_headers_to_add:
-            - append: false
-              header:
+            - header:
                 key: x-local-rate-limit
                 value: 'true'
-          descriptors:
-            - entries:
-                - key: remote_address
-              token_bucket:
-                max_tokens: {{ .Values.rateLimit.userLimit }}
-                tokens_per_fill: {{ .Values.rateLimit.userLimit }}
-                fill_interval: 60s
-            - entries:
-                - key: generic_key
-                  value: "global_fallback"
-              token_bucket:
-                max_tokens: {{ .Values.rateLimit.globalLimit }}
-                tokens_per_fill: {{ .Values.rateLimit.globalLimit }}
-                fill_interval: 60s
-  - applyTo: HTTP_ROUTE
-    match:
-      context: SIDECAR_INBOUND
-    patch:
-      operation: MERGE
-      value:
-        route:
-          rate_limits:
-            - actions:
-                - remote_address: {}
-            - actions:
-                - generic_key:
-                    descriptor_value: "global_fallback"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
@@ -78,7 +48,7 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      app: app
+      app: sentiment-release-app
   configPatches:
   - applyTo: HTTP_FILTER
     match:
@@ -93,51 +63,21 @@ spec:
         name: envoy.filters.http.local_ratelimit
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
-          stat_prefix: local_rate_limiter
+          stat_prefix: app_service_rate_limiter
           token_bucket:
-            max_tokens: {{ .Values.rateLimit.globalLimit }}
-            tokens_per_fill: {{ .Values.rateLimit.globalLimit }}
+            max_tokens: {{ .Values.rateLimit.userLimit }}
+            tokens_per_fill: {{ .Values.rateLimit.userLimit }}
             fill_interval: 60s
           filter_enabled:
-            runtime_key: local_rate_limit_enabled
             default_value:
               numerator: 100
               denominator: HUNDRED
           filter_enforced:
-            runtime_key: local_rate_limit_enforced
             default_value:
               numerator: 100
               denominator: HUNDRED
           response_headers_to_add:
-            - append: false
-              header:
+            - header:
                 key: x-local-rate-limit
                 value: 'true'
-          descriptors:
-            - entries:
-                - key: remote_address
-              token_bucket:
-                max_tokens: {{ .Values.rateLimit.userLimit }}
-                tokens_per_fill: {{ .Values.rateLimit.userLimit }}
-                fill_interval: 60s
-            - entries:
-                - key: generic_key
-                  value: "global_fallback"
-              token_bucket:
-                max_tokens: {{ .Values.rateLimit.globalLimit }}
-                tokens_per_fill: {{ .Values.rateLimit.globalLimit }}
-                fill_interval: 60s
-  - applyTo: HTTP_ROUTE
-    match:
-      context: SIDECAR_INBOUND
-    patch:
-      operation: MERGE
-      value:
-        route:
-          rate_limits:
-            - actions:
-                - remote_address: {}
-            - actions:
-                - generic_key:
-                    descriptor_value: "global_fallback"
 {{- end }}
