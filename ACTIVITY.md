@@ -155,6 +155,7 @@
 -- Alex: --
 - Created PR: https://github.com/remla25-team6/model-service/pull/12 (related to A1)
 - Created PR: https://github.com/remla25-team6/app/pull/7 (related to A1)
+- Created PR: https://github.com/remla25-team6/app/pull/9 (related to A3)
 - Approval (and helped): https://github.com/remla25-team6/model-training/pull/13 (related to A4)
 
 -- Inaesh: --
@@ -165,8 +166,11 @@
 
 -- Maarten --
 - Created PR: https://github.com/remla25-team6/operation/pull/60 (related to A5)
-- Approval:
+- Approval: https://github.com/remla25-team6/operation/pull/61
 
 -- Martijn --
-- Created PR: https://github.com/remla25-team6/operation/pull/61
+- Created PR: https://github.com/remla25-team6/operation/pull/61 (related to A2)
 - Approval: https://github.com/remla25-team6/operation/pull/58
+- 
+
+### Week 9 (June 16+)
