@@ -42,7 +42,7 @@ error_message() {
 add_host_entry() {
     local ip="$1"
     local hostname="$2"
-    if ! grep -qP "^\s*${ip}\s+${hostname}\s*$" /etc/hosts; then
+    if ! grep -qE "^[[:space:]]*${ip}[[:space:]]+${hostname}[[:space:]]*$" /etc/hosts; then
         log_message "Adding host entry to /etc/hosts: ${ip} ${hostname}"
         echo "${ip} ${hostname}" | sudo tee -a /etc/hosts > /dev/null
     else
@@ -127,7 +127,7 @@ cleanup_system() {
     echo -e "\033[93mDo you want to proceed with the system cleanup? (answering no will continue the deployment) (y/N): \033[0m"
     read -r response
     
-    case "${response,,}" in
+    case "$response_lc" in
         y|yes)
             echo -e "\033[92mProceeding with system cleanup...\033[0m"
             ;;
@@ -149,9 +149,12 @@ cleanup_system() {
         VBoxManage hostonlyif remove "$iface" 2>/dev/null || true
     done
 
-    # Clear caches
-    echo "Clearing system caches..."
-    echo "3" | sudo tee /proc/sys/vm/drop_caches > /dev/null
+    # Clear caches, This is Linux-only, skip on macOS
+    if [[ "$(uname)" == "Linux" ]]; then
+        echo "3" | sudo tee /proc/sys/vm/drop_caches > /dev/null
+    else
+        warning_message "Skipping Linux-specific cache cleanup on macOS"
+    fi
     
     # Remove .vagrant directory
     rm -rf .vagrant/
