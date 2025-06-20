@@ -120,3 +120,57 @@
 -- Martijn --
 - Created PR: https://github.com/remla25-team6/operation/pull/49 (related to A5)
 - Approval: https://github.com/remla25-team6/operation/pull/43
+
+### Week 7 (June 2+)
+
+-- Sten: --
+- Created PR: https://github.com/remla25-team6/operation/pull/53 (related to A1)
+- Approval: https://github.com/remla25-team6/app/pull/6
+
+-- Alex: --
+- Created PR:
+- Approval:
+
+-- Inaesh: --
+- Created PR: https://github.com/remla25-team6/model-training/pull/10 (related to A1)
+- Created PR: https://github.com/remla25-team6/model-training/pull/11 (related to A4)
+- Created PR: https://github.com/remla25-team6/model-training/pull/12 (related to A4)
+- Approval: https://github.com/remla25-team6/model-service/pull/10
+- Approval: https://github.com/remla25-team6/operation/pull/53
+
+-- Maarten --
+- Created PR:
+- Approval: https://github.com/remla25-team6/model-training/pull/11
+
+-- Martijn --
+- Created PR:
+- Approval: https://github.com/remla25-team6/model-training/pull/12
+
+### Week 8 (June 9+)
+
+-- Sten: --
+- Created PR: https://github.com/remla25-team6/model-training/pull/13 (related to A4)
+- Approval: https://github.com/remla25-team6/model-training/pull/14
+
+-- Alex: --
+- Created PR: https://github.com/remla25-team6/model-service/pull/12 (related to A1)
+- Created PR: https://github.com/remla25-team6/app/pull/7 (related to A1)
+- Created PR: https://github.com/remla25-team6/app/pull/9 (related to A3)
+- Approval (and helped): https://github.com/remla25-team6/model-training/pull/13 (related to A4)
+
+-- Inaesh: --
+- Created PR: https://github.com/remla25-team6/operation/pull/58 (related to A2)
+- Created PR: https://github.com/remla25-team6/model-training/pull/14 (related to A4)
+- Approval: https://github.com/remla25-team6/model-service/pull/12
+- Approval: https://github.com/remla25-team6/app/pull/7
+
+-- Maarten --
+- Created PR: https://github.com/remla25-team6/operation/pull/60 (related to A5)
+- Approval: https://github.com/remla25-team6/operation/pull/61
+
+-- Martijn --
+- Created PR: https://github.com/remla25-team6/operation/pull/61 (related to A2)
+- Approval: https://github.com/remla25-team6/operation/pull/58
+- 
+
+### Week 9 (June 16+)

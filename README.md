@@ -1,7 +1,7 @@
 # CS4295 - Team 6 Project
 
 ## Documentation Overview
-
+* [Requirements](#requirements)
 * [Starting the application](#starting-the-application)
 
   * [With Docker](#with-docker)
@@ -20,6 +20,12 @@
 * [Repositories overview](#repositories)
 
 ---
+## Requirements
+Before starting the application, ensure you have the following installed:
+* Docker & Docker Compose
+* Ansible
+* Vagrant
+* VirtualBox
 
 ## Starting the application
 
@@ -54,17 +60,31 @@ ALERT_SENDER=<YOUR-GMAIL>
 ```
 The above variables *need* to be exported as environment variables. If you are using the startup script then it will prompt you for the above values and store them in a file called ```.monitoring.env``` and on subsequent deployments will read them from this file and *export them for you*.
 
-#### Using the startup script
+#### Using the startup script 
 
 This approach is the fastest but it requires GNU parallel:
 ```bash
-sudo apt-get install parallel
+sudo apt-get install parallel # Linux
 ```
+
+for macOS users, you can install GNU parallel using Homebrew:
+```bash
+brew install parallel # macOS
+```
+
 The entire application can be then deployed using the provided start script:
 ```bash
 chmod +x deploy-app.sh
 ./deploy-app.sh
 ```
+
+or, for macOS users (intel only): 
+```bash
+chmod +x deploy-app-mac.sh
+```
+
+
+
 If ```.monitoring.env``` is not present the script will prompt you for the required values that need to be set and it will export them for you automatically.
 
 Note that this automatically adds the following three entries to your ```/etc/hosts``` file, if they are not already present:
@@ -81,7 +101,7 @@ On each run the deployment script will prompt the user for the possibility of a 
 ```bash
 vagrant up  # Start vagrant and provision
 ansible-galaxy collection install -r requirements.yml # Install required Ansible collections
-ansible-playbook -u vagrant --private-key=.vagrant/machines/ctrl/virtualbox/private_key -i 192.168.56.100, finalization.yml  # Run final provisioning steps
+ansible-playbook -i ansible/inventory.cfg finalization.yml  # Run final provisioning steps
 ```
 
 ##### 1a. To open the Kubernetes Dashboard without a tunnel (optional):
@@ -125,7 +145,10 @@ helm install <release-name> .  # Install the application using the Helm chart wi
 
 After starting the application:
 
-* Access at: [https://192.168.56.90:443/](http://192.168.56.90:443/)
+* Access at: [https://192.168.56.91/](https://192.168.56.91/)  
+
+* The app is also be accessible via the Istio ingress gateway at: [https://192.168.56.92/](https://192.168.56.92/)  
+
 * Under some conditions the app may not be reachable at this IP. If the app is not reachable:
 
   ```bash
@@ -140,7 +163,7 @@ After starting the application:
 ## Accessing Grafana Dashboard
 In order to import the dashboard in grafana and view the metrics open Grafana at:
 
-- https://grafana.local (or 192.168.56.93:443)
+- https://grafana.local (or https://192.168.56.93/)
 
 Next, login using default credentials:
 

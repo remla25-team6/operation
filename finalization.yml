@@ -301,8 +301,7 @@
             name: default
             labels:
               istio-injection: enabled
-
-    
+              
     - name: Create TLS secret for Ingress
       kubernetes.core.k8s:
         state: present
@@ -316,8 +315,7 @@
           data:
             tls.crt: "{{ tls_cert.stdout | b64encode }}"
             tls.key: "{{ tls_key.stdout | b64encode }}"
-
-              
+            
     - name: Create monitoring namespace
       kubernetes.core.k8s:
         state: present

@@ -31,3 +31,8 @@ grafana:
     # namespace: monitoring
     jsonFileName: app-custom-dashboard.json
     experimentJSON: experiment-dashboard.json
+
+# Rate limiter (see ratelimit-configmap and envoyfilter)
+rateLimit:
+  enabled: true
+  userLimit: 20  # requests per minute per user
