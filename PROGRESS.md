@@ -1,8 +1,7 @@
 # A1. Versions, Releases & Containerization
 ### Basic Requirements
 1. **Data Requirements:** Pass ✅
-2. **Sensible Use Case:** Pass 🟡
-    - User input is leveraged for validation or growing dataset (not yet connected).
+2. **Sensible Use Case:** Pass ✅
 
 ### Versioning and Releases
 1. **Automated release process:** Excellent ✅
@@ -39,11 +38,7 @@
 # A5. Istio Service Mesh
 ### Implementation
 1. **Traffic Management:** Excellent ✅
-2. **Additional Use Case:** Insufficient ❌
-    - An additional use case has been attempted, but it does not work.
-    - One of the described use cases has been partially realized, with observable effects.
-    - One of the described use cases has been realized. It generally works, but falls short in some aspects.
-    - One of the described use cases has been fully realized.
+2. **Additional Use Case:** Excellent ✅
 3. **Continous Experimentation:**  Excellent ✅
 
 ### Documentation
