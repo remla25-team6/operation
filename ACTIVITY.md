@@ -175,7 +175,7 @@
 ### Week 9 (June 16+)
 
 -- Sten: --
-- Created PR:
+- Created PR: https://github.com/remla25-team6/app/pull/10 (related to A1)
 - Approval: 
 
 -- Alex: --
@@ -184,14 +184,14 @@
 
 -- Inaesh: --
 - Created PR:
-- Approval:
+- Approval: https://github.com/remla25-team6/app/pull/10
 
 -- Maarten --
 - Created PR:
 - Approval:
 
 -- Martijn --
-- Created PR:
+- Created PR: https://github.com/remla25-team6/app/pull/11 (related to A1)
 - Approval:
 
 ### Week 10 (June 23+) -- No acitivity to report. Only clean-up and submission.
