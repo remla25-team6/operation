@@ -179,7 +179,7 @@
 - Approval: 
 
 -- Alex: --
-- Created PR:
+- Created PR: https://github.com/remla25-team6/operation/pull/64 (related to A3)
 - Approval:
 
 -- Inaesh: --
