@@ -171,6 +171,27 @@
 -- Martijn --
 - Created PR: https://github.com/remla25-team6/operation/pull/61 (related to A2)
 - Approval: https://github.com/remla25-team6/operation/pull/58
-- 
 
 ### Week 9 (June 16+)
+
+-- Sten: --
+- Created PR: https://github.com/remla25-team6/app/pull/10 (related to A1)
+- Approval: 
+
+-- Alex: --
+- Created PR: https://github.com/remla25-team6/operation/pull/64 (related to A3)
+- Approval:
+
+-- Inaesh: --
+- Created PR:
+- Approval: https://github.com/remla25-team6/app/pull/10
+
+-- Maarten --
+- Created PR:
+- Approval:
+
+-- Martijn --
+- Created PR: https://github.com/remla25-team6/app/pull/11 (related to A1)
+- Approval:
+
+### Week 10 (June 23+) -- No acitivity to report. Only clean-up and submission.
