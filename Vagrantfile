@@ -3,7 +3,7 @@ has_vmware = Vagrant.has_plugin?("vagrant-vmware-desktop")
 
 # Choose box based on provider availability
 BOX = "bento/ubuntu-24.04"
-WORKER_MEMORY = ENV.fetch("WORKER_MEM", 3000).to_i
+WORKER_MEMORY = ENV.fetch("WORKER_MEM", 4000).to_i
 NUM_WORKERS = ENV.fetch("NUM_WORKERS", 2).to_i
 shared_folder_path = File.expand_path("./shared")
 
@@ -39,13 +39,13 @@ Vagrant.configure("2") do |config|
   config.vm.define "ctrl" do |ctrl|
     if has_vmware
       ctrl.vm.provider "vmware_desktop" do |vb|
-        vb.vmx["memsize"] = "6000"
+        vb.vmx["memsize"] = "4000"
         vb.vmx["numvcpus"] = "4"
         vb.linked_clone = false
       end
     else
       ctrl.vm.provider "virtualbox" do |vb|
-        vb.memory = 4000
+        vb.memory = 3000
         vb.cpus = 4
       end
     end

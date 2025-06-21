@@ -18,4 +18,8 @@ spec:
       path: {{ .Values.metrics.path }}
       interval: {{ .Values.metrics.serviceMonitor.interval }}
       scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
+      relabelings:
+      - sourceLabels: [__meta_kubernetes_pod_label_version]
+        targetLabel: version
+        action: replace
 {{- end }}
