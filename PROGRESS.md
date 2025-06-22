@@ -41,12 +41,5 @@
 3. **Continous Experimentation:**  Excellent ✅
 
 ### Documentation
-1. **Deployment Documentation:** Insufficient ❌
-    - The documentation is limited to the deployment structure or the data flow.
-    - The documentation describes the deployment structure, i.e., the entities and their connections.
-    - The documentation describes the data flow for incoming requests.
-    - The documentation contains visualizations that are connected to the text.
-    - The documentation includes all deployed resource types and relations.
-    - The documentation is visually appealing and clear.
-    - A new team member could contribute in a design discussion after studying the documentation.
+1. **Deployment Documentation:** Excellent ✅
 3. **Extension Proposal:** Excellent ✅
