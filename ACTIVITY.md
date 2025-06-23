@@ -183,7 +183,7 @@
 - Approval:
 
 -- Inaesh: --
-- Created PR:
+- Created PR: https://github.com/remla25-team6/model-training/pull/17 (related to A4)
 - Approval: https://github.com/remla25-team6/app/pull/10
 
 -- Maarten --
