@@ -176,7 +176,7 @@
 
 -- Sten: --
 - Created PR: https://github.com/remla25-team6/app/pull/10 (related to A1)
-- Approval: 
+- Approval: https://github.com/remla25-team6/operation/pull/60
 
 -- Alex: --
 - Created PR: https://github.com/remla25-team6/operation/pull/64 (related to A3)
@@ -185,13 +185,14 @@
 -- Inaesh: --
 - Created PR: https://github.com/remla25-team6/model-training/pull/17 (related to A4)
 - Approval: https://github.com/remla25-team6/app/pull/10
+- Approval: https://github.com/remla25-team6/operation/pull/49
 
 -- Maarten --
-- Created PR:
+- Created PR: https://github.com/remla25-team6/app/pull/11 (related to A1)
 - Approval:
 
 -- Martijn --
-- Created PR: https://github.com/remla25-team6/app/pull/11 (related to A1)
+- Created PR: https://github.com/remla25-team6/app/pull/12 (related to A3)
 - Approval:
 
 ### Week 10 (June 23+) -- No acitivity to report. Only clean-up and submission.
