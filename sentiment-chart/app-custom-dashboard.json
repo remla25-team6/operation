@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 15,
+  "id": 32,
   "links": [],
   "panels": [
     {
@@ -78,7 +78,7 @@
           "expr": "application_started_time_seconds",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "legendFormat": "__auto",
+          "legendFormat": "App {{label_name}}{{version}}",
           "range": true,
           "refId": "A",
           "useBackend": false
@@ -381,6 +381,71 @@
       ],
       "title": "Inference Requests Rate",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 8,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "app_average_text_length",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "App {{label_name}}{{version}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Average text input length",
+      "type": "gauge"
     }
   ],
   "preload": false,
@@ -449,5 +514,5 @@
   "timezone": "browser",
   "title": "Inference Classifier App Dashboard",
   "uid": "5ef5d86c-81bb-4802-9258-92ba7d0c79d3",
-  "version": 3
+  "version": 1
 }
