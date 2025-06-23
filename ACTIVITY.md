@@ -190,7 +190,7 @@
 
 -- Maarten --
 - Created PR: https://github.com/remla25-team6/app/pull/11 (related to A1)
-- Approval:
+- Approval: https://github.com/remla25-team6/operation/pull/44
 
 -- Martijn --
 - Created PR: https://github.com/remla25-team6/app/pull/12 (related to A3)
