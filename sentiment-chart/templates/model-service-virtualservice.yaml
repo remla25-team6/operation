@@ -2,19 +2,19 @@
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: {{ .Release.Name }}-model-service-vs
+  name: {{ .Release.Name }}-{{ .Values.model.serviceName }}-vs
 spec:
   hosts:
-    - {{ .Release.Name }}-model-service
+    - {{ .Release.Name }}-{{ .Values.model.serviceName }}
   http:
     - match:
         - sourceLabels:
             version: v2
       route:
         - destination:
-            host: {{ .Release.Name }}-model-service
+            host: {{ .Release.Name }}-{{ .Values.model.serviceName }}
             subset: v2
     - route:
         - destination:
-            host: {{ .Release.Name }}-model-service
+            host: {{ .Release.Name }}-{{ .Values.model.serviceName }}
             subset: v1

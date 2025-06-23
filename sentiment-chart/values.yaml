@@ -4,6 +4,7 @@ model:
   host: model-service:8080
   mlModelVersion: "v0.1.0"
   mlModelVersion2: "v0.1.0"
+  serviceName: model-service
 
 app:
   image: ghcr.io/remla25-team6/app:0.1.1

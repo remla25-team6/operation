@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-model-service-v1
+  name: {{ .Release.Name }}-{{ .Values.model.serviceName }}-v1
   labels:
-    app: {{ .Release.Name }}-model-service
+    app: {{ .Release.Name }}-{{ .Values.model.serviceName }}
     version: v1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-model-service
+      app: {{ .Release.Name }}-{{ .Values.model.serviceName }}
       version: v1
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-model-service
+        app: {{ .Release.Name }}-{{ .Values.model.serviceName }}
         version: v1
     spec:
       containers:
@@ -37,20 +37,20 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-model-service-v2
+  name: {{ .Release.Name }}-{{ .Values.model.serviceName }}-v2
   labels:
-    app: {{ .Release.Name }}-model-service
+    app: {{ .Release.Name }}-{{ .Values.model.serviceName }}
     version: v2
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-model-service
+      app: {{ .Release.Name }}-{{ .Values.model.serviceName }}
       version: v2
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-model-service
+        app: {{ .Release.Name }}-{{ .Values.model.serviceName }}
         version: v2
     spec:
       containers:

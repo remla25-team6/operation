@@ -1,9 +1,9 @@
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
-  name: {{ .Release.Name }}-model-service-dr
+  name: {{ .Release.Name }}-{{ .Values.model.serviceName }}-dr
 spec:
-  host: {{ .Release.Name }}-model-service
+  host: {{ .Release.Name }}-{{ .Values.model.serviceName }}
   subsets:
     - name: v1
       labels:
