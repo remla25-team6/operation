@@ -193,6 +193,6 @@
 
 -- Martijn --
 - Created PR: https://github.com/remla25-team6/app/pull/12 (related to A3)
-- Approval:
+- Approval: https://github.com/remla25-team6/operation/pull/64
 
 ### Week 10 (June 23+) -- No acitivity to report. Only clean-up and submission.
