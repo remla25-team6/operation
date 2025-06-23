@@ -184,6 +184,7 @@
 
 -- Inaesh: --
 - Created PR: https://github.com/remla25-team6/model-training/pull/17 (related to A4)
+- Created PR: https://github.com/remla25-team6/operation/pull/66 (related to A3)
 - Approval: https://github.com/remla25-team6/app/pull/10
 - Approval: https://github.com/remla25-team6/operation/pull/49
 
