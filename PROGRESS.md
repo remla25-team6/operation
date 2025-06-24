@@ -1,8 +1,7 @@
 # A1. Versions, Releases & Containerization
 ### Basic Requirements
 1. **Data Requirements:** Pass ✅
-2. **Sensible Use Case:** Pass 🟡
-    - User input is leveraged for validation or growing dataset (not yet connected).
+2. **Sensible Use Case:** Pass ✅
 
 ### Versioning and Releases
 1. **Automated release process:** Excellent ✅
@@ -22,8 +21,7 @@
 ### Kubernetes & Monitoring
 1. **Kubernetes Usage**: Excellent ✅
 2. **Helm Installation:** Excellent ✅
-3. **App Monitoring:** Good 🟡
-    - Each metric types has at least one example, in which the metric is broken down with labels.
+3. **App Monitoring:** Excellent ✅
 5. **Grafana:** Excellent ✅
 
 # A4. ML Testing and Config Management
@@ -39,20 +37,9 @@
 # A5. Istio Service Mesh
 ### Implementation
 1. **Traffic Management:** Excellent ✅
-2. **Additional Use Case:** Insufficient ❌
-    - An additional use case has been attempted, but it does not work.
-    - One of the described use cases has been partially realized, with observable effects.
-    - One of the described use cases has been realized. It generally works, but falls short in some aspects.
-    - One of the described use cases has been fully realized.
+2. **Additional Use Case:** Excellent ✅
 3. **Continous Experimentation:**  Excellent ✅
 
 ### Documentation
-1. **Deployment Documentation:** Insufficient ❌
-    - The documentation is limited to the deployment structure or the data flow.
-    - The documentation describes the deployment structure, i.e., the entities and their connections.
-    - The documentation describes the data flow for incoming requests.
-    - The documentation contains visualizations that are connected to the text.
-    - The documentation includes all deployed resource types and relations.
-    - The documentation is visually appealing and clear.
-    - A new team member could contribute in a design discussion after studying the documentation.
+1. **Deployment Documentation:** Excellent ✅
 3. **Extension Proposal:** Excellent ✅
