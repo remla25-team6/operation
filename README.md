@@ -264,3 +264,6 @@ Automated deployment scripts for quickly setting up the application stack on Lin
 
 ### `docker-compose.yml`
 Defines the multi-service Docker Compose setup for local development and testing. It specifies the services, environment variables, secrets, and volumes required to run the application stack using Docker.
+
+## AI Disclaimer
+This README was refined using ChatGPT-4o.
