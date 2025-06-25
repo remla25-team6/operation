@@ -12,6 +12,7 @@
       * [B. Deployment using Helm](#b-deployment-using-helm)
 * [Access the Application](#access-the-application)
 * [Repositories overview](#repositories)
+* [Operation Repository Overview](#operation-repository-overview)
 
 ---
 
@@ -211,3 +212,55 @@ Below we list the repositories in our system, along with pointers to relevant fi
 * [VersionUtil.java](https://github.com/remla25-team6/lib-version/blob/main/src/main/java/org/remla25team6/libversion/VersionUtil.java): The class that can be asked for the library's versions.
 * [Workflow](https://github.com/remla25-team6/lib-version/blob/main/.github/workflows/release.yml): The workflow that automatically releases the package and updates the version after new tag.
 * [version.properties](https://github.com/remla25-team6/lib-version/blob/main/src/main/resources/version.properties): The file that stores the library version which is automatically populated by Maven through `pom.xml`.
+
+## Operation Repository Overview
+
+This repository contains all infrastructure, orchestration, and deployment resources for the project. Below is an overview of the main folders and their purposes:
+
+### `docs/`
+Contains documentation for deployment, continuous experimentation, and project extensions. Notable files:
+- `deployment.md`: Detailed deployment information and architecture.
+- `continuous-experimentation.md`: Information on a continous experiment.
+- `extension.md`: Documentation on possible project extensions.
+- `images/`: Diagrams and images used in documentation.
+
+### `kubernetes/`
+Contains Kubernetes manifest templates and configuration files for deploying services and infrastructure.
+- `sentiment.yml.j2`: Jinja2 template for Kubernetes deployment manifests.
+
+### `ansible/`
+Holds Ansible playbooks and inventory for automating VM and cluster setup.
+- `ctrl.yml`, `node.yml`, `general.yml`: Playbooks for provisioning controller and worker nodes.
+- `inventory.cfg`: Ansible inventory file.
+- `templates/hosts.j2`: Jinja2 template for generating hosts files.
+
+### `finalization.yml`, `deployment.yml`
+Ansible playbooks for final cluster provisioning and application deployment.
+
+### `sentiment-chart/` (Helm Chart)
+Helm chart for deploying the application stack on Kubernetes.
+- `Chart.yaml`: Helm chart metadata.
+- `values.yaml`: Default configuration values.
+- `templates/`: Helm templates for Kubernetes resources.
+- `app-custom-dashboard.json`, `experiment-dashboard.json`: Predefined Grafana dashboards.
+- `.helmignore`: Patterns to ignore when packaging the chart.
+
+### `Vagrantfile`
+Defines the Vagrant-based virtual machine cluster for local Kubernetes and Ansible testing.
+
+### `scripts/`
+Utility and helper scripts for testing and automation.
+- `test-experiment.py`: Script for running experiment tests.
+
+### `shared/`
+Shared files or resources used across VMs or containers.
+
+### `keys/` and `secrets/`
+- `keys/`: Public SSH keys for team members.
+- `secrets/`: Example secret files for use in Docker Compose or Kubernetes.
+
+### `deploy-app.sh`, `deploy-app-mac.sh`
+Automated deployment scripts for quickly setting up the application stack on Linux and macOS (Intel) environments. These scripts handle environment variable setup, prompt for required credentials, and manage hosts file entries for local development.
+
+### `docker-compose.yml`
+Defines the multi-service Docker Compose setup for local development and testing. It specifies the services, environment variables, secrets, and volumes required to run the application stack using Docker.
