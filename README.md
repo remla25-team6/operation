@@ -1,4 +1,4 @@
-# CS4295 - Team 6 Project
+# CS4295 REMLA 2025 Team 6: Sentiment Analysis Application
 
 ## Table of Contents
 * [Requirements](#requirements)
