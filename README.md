@@ -186,11 +186,13 @@ Below we list the repositories in our system, along with pointers to relevant fi
 * [prerelease.yml](https://github.com/remla25-team6/model-service/blob/main/.github/workflows/prerelease.yml): Workflow that triggers on any push to main that creates a pre-release.
 
 ### [model-training](https://github.com/remla25-team6/model-training)
-
-* [data_loader.py](https://github.com/remla25-team6/model-training/blob/main/src/restaurant_sentiment/data_loader.py): Method that loads training data and preprocesses data using the *lib_ml* package.
-* [train.py](https://github.com/remla25-team6/model-training/blob/main/src/restaurant_sentiment/train.py): Method that trains a Naive Bayes classifier for restaurant sentiment analysis.
+* [train.py](https://github.com/remla25-team6/model-training/blob/main/model-training/restaurant_sentiment/train.py): Method that trains a SVC classifier for restaurant sentiment analysis.
+* [eval.py](https://github.com/remla25-team6/model-training/blob/main/model-training/restaurant_sentiment/eval.py): Method that evaluates classifier.
+* [tests](https://github.com/remla25-team6/model-training/tree/main/model-training/tests): Directory that contains tests for features, infrastructure, model development, performance, and mutamorphic tests.
+* [dvc.yaml](https://github.com/remla25-team6/model-training/blob/main/dvc.yaml): Defines DVC stages.
 * [prerelease.yml](https://github.com/remla25-team6/model-training/blob/main/.github/workflows/prerelease.yml): Workflow that triggers on any push to main that creates a pre-release.
 * [release.yml](https://github.com/remla25-team6/model-training/blob/main/.github/workflows/release.yml): Workflow that triggers on semantic tagging that creates a stable release.
+* [testing.yml](https://github.com/remla25-team6/model-training/blob/main/.github/workflows/testing.yml): Workflow that triggers testing and linting.
 
 ### [lib-ml](https://github.com/remla25-team6/lib-ml)
 
@@ -207,7 +209,7 @@ Below we list the repositories in our system, along with pointers to relevant fi
 
 ### [operation](https://github.com/remla25-team6/operation)
 
-* In `submissions/a1.md` you can find a summary of the features we implemented per repo for assignment 1.
+* See Section **Operation Repository Overview** below.
 
 ### [lib-version](https://github.com/remla25-team6/lib-version)
 
