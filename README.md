@@ -165,7 +165,9 @@ In order to import the dashboard in Grafana and view the metrics, open Grafana a
 
 - https://grafana.local (or https://192.168.56.93/)
 
-Next, login using default credentials:
+If you deployed with Kubernetes then use the Grafana credentials you defined earlier.
+
+Otherwise, login using default credentials:
 
 - user: admin
 - pass: admin
